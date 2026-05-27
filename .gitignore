@@ -1,0 +1,9 @@
+.env
+*.local
+.DS_Store
+__pycache__/
+*.pyc
+backend/gs_service/results/
+backend/gs_service/uploads/
+*.pt
+*.pkl

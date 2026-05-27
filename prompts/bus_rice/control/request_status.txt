@@ -1,0 +1,8 @@
+【表注释】：
+【字段信息】：
+字段名	类型	注释
+session_id	varchar(64)	
+status	varchar(32)	processing/success/failed
+message	varchar(255)	当前状态描述
+update_time	timestamp	
+confirmation	varchar(10)	用户确认结果: yes/no

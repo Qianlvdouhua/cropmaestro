@@ -1,0 +1,26 @@
+-- Commercial rice varieties (no 共享类型 column). Import data from data/bus_rice_data.sql
+CREATE TABLE IF NOT EXISTS bus_rice_data (
+  作物名称 VARCHAR(50) DEFAULT NULL,
+  全国统一编号 VARCHAR(50) DEFAULT NULL,
+  种质名称 VARCHAR(100) DEFAULT NULL,
+  籼粳亚种 VARCHAR(20) DEFAULT NULL,
+  早中晚稻 VARCHAR(20) DEFAULT NULL,
+  粘糯 VARCHAR(20) DEFAULT NULL,
+  播种期 VARCHAR(200) DEFAULT NULL,
+  全生育期 INT DEFAULT NULL,
+  株高 DECIMAL(6,2) DEFAULT NULL,
+  穗长 DECIMAL(6,2) DEFAULT NULL,
+  有效穗数 DECIMAL(6,2) DEFAULT NULL,
+  穗粒数 DECIMAL(6,2) DEFAULT NULL,
+  结实率 DECIMAL(5,2) DEFAULT NULL,
+  千粒重 DECIMAL(6,2) DEFAULT NULL,
+  粒长 DECIMAL(6,2) DEFAULT NULL,
+  谷粒长宽比 DECIMAL(6,2) DEFAULT NULL,
+  谷粒形状 VARCHAR(100) DEFAULT NULL,
+  颖尖色 VARCHAR(20) DEFAULT NULL,
+  颖壳色 VARCHAR(20) DEFAULT NULL,
+  原产国 VARCHAR(50) DEFAULT NULL,
+  原产地 VARCHAR(100) DEFAULT NULL,
+  KEY idx_national_id (全国统一编号),
+  KEY idx_species (种质名称)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商业水稻品种数据';

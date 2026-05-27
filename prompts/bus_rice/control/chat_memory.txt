@@ -1,0 +1,11 @@
+【表注释】：用于上下文记忆的对话记录表
+【字段信息】：
+字段名	类型	注释
+id	int	主键 ID
+session_id	varchar(128)	会话唯一标识
+question	text	用户提问内容
+answer	text	LLM 回答内容
+created_at	timestamp	创建时间
+sql	text	
+query_hash	varchar(64)	
+varieties	text	查询问题相关品种

@@ -1,0 +1,18 @@
+# Shared
+python-dotenv>=1.0.0
+
+# status_api.py (port 5000)
+flask>=2.3.0
+flask-cors>=4.0.0
+pymysql>=1.1.0
+DBUtils>=3.0.0
+
+# gs_service / gs_predict_api.py (port 8000)
+fastapi>=0.110.0
+uvicorn[standard]>=0.27.0
+python-multipart>=0.0.9
+pandas>=2.0.0
+numpy>=1.24.0
+joblib>=1.3.0
+# Genomic prediction (install only if you use GS endpoints)
+torch>=2.0.0
