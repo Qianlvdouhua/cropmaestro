@@ -8,7 +8,6 @@
 | `bus_rice_data` 商业品种记录 | ✅ | `data/bus_rice_data.sql`（MySQL dump，约 3.1 MB） |
 | `bus_rice_cache_results` | ✅ 结构 | 运行时由工作流写入 |
 | `chat_memory` / `request_status` | ✅ 结构 | 见 `schema/ddl/` |
-| 国家级 `rice_data`（含共享类型） | ❌ | 未纳入本仓库 |
 
 ## 导入
 
