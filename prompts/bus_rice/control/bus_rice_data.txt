@@ -1,0 +1,24 @@
+【表注释】：
+【字段信息】：
+字段名	类型	注释
+作物名称	varchar(50)	
+全国统一编号	varchar(50)	
+种质名称	varchar(100)	
+籼粳亚种	varchar(20)	
+早中晚稻	varchar(20)	
+粘糯	varchar(20)	
+播种期	varchar(200)	
+全生育期	int	
+株高	decimal(6,2)	
+穗长	decimal(6,2)	
+有效穗数	decimal(6,2)	
+穗粒数	decimal(6,2)	
+结实率	decimal(5,2)	
+千粒重	decimal(6,2)	
+粒长	decimal(6,2)	
+谷粒长宽比	decimal(6,2)	
+谷粒形状	varchar(100)	
+颖尖色	varchar(20)	
+颖壳色	varchar(20)	
+原产国	varchar(50)	
+原产地	varchar(100)	
