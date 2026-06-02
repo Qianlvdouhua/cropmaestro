@@ -18,7 +18,7 @@ CropMonster 是一个面向作物种质资源的智能检索框架。本仓库�
 | `prompts/bus_rice/` | 商业水稻四层提示词 |
 | `schema/` | DDL + `schema_bus_rice_demo.txt` |
 | `data/` | `bus_rice_data.sql` 商业品种数据 |
-| `cgr_bench/` | **CGR-Bench** 金标数据集（150 题，五作物；与开源演示数据口径不同） |
+| `cgr_bench/` | CGR-Bench 金标数据集（150 题，五种作物；注意与开源数据口径不同） |
 | `backend/` | 状态同步与 GS 预测服务 |
 | `docs/` | 架构与部署 |
 
