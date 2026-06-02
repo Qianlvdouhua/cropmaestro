@@ -22,7 +22,6 @@ mysql -u root -p cropmonster_demo < schema/ddl/02_bus_rice_cache_results.sql
 ## 与工作流的关系
 
 - 请求体设置 `"commercialMode": true` 且作物为水稻时，工作流路由到 `bus_rice` / `bus_rice_data`。
-- 商业库**无** `共享类型` 字段，与 `prompts/bus_rice/` 中提示词一致。
 
 ## 合规提示
 
