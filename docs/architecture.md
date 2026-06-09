@@ -1,11 +1,11 @@
 # Architecture
 
-CropMonster orchestrates n8n agents with MySQL and optional backend HTTP services. The open-source demo uses **commercial rice** (`bus_rice_data`) only.
+CropMaestro orchestrates n8n agents with MySQL and optional backend HTTP services. The open-source demo uses **commercial rice** (`bus_rice_data`) only.
 
 ## Repository Layout
 
 ```text
-cropmonster/
+cropmaestro/
 ├── workflow/
 ├── prompts/bus_rice/      # Four-layer prompts (commercial rice)
 ├── schema/ddl/

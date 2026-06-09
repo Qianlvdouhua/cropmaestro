@@ -21,7 +21,7 @@ Copy repo `.env.example` to `.env` and set MySQL variables for the status API.
 Create table:
 
 ```bash
-mysql -u root -p cropmonster_demo < ../schema/ddl/03_request_status.sql
+mysql -u root -p cropmaestro_demo < ../schema/ddl/03_request_status.sql
 ```
 
 Run:

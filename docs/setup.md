@@ -3,11 +3,11 @@
 ## 1. 数据库
 
 ```bash
-mysql -u root -p cropmonster_demo < schema/ddl/00_chat_memory.sql
-mysql -u root -p cropmonster_demo < schema/ddl/01_bus_rice_data.sql
-mysql -u root -p cropmonster_demo < data/bus_rice_data.sql
-mysql -u root -p cropmonster_demo < schema/ddl/02_bus_rice_cache_results.sql
-mysql -u root -p cropmonster_demo < schema/ddl/03_request_status.sql
+mysql -u root -p cropmaestro_demo < schema/ddl/00_chat_memory.sql
+mysql -u root -p cropmaestro_demo < schema/ddl/01_bus_rice_data.sql
+mysql -u root -p cropmaestro_demo < data/bus_rice_data.sql
+mysql -u root -p cropmaestro_demo < schema/ddl/02_bus_rice_cache_results.sql
+mysql -u root -p cropmaestro_demo < schema/ddl/03_request_status.sql
 ```
 
 说明：`data/bus_rice_data.sql` 为完整 dump（含建表与 INSERT），若已执行 `01_bus_rice_data.sql`，导入 dump 时会先 `DROP TABLE` 再重建并灌数。
@@ -37,7 +37,7 @@ python status_api.py
 
 ## 4. 导入 n8n 工作流
 
-1. 导入 `workflow/CropMonster.workflow.json`
+1. 导入 `workflow/CropMaestro.workflow.json`
 2. 配置 MySQL、LLM（及可选 Qdrant）凭证
 3. Webhook 请求示例（商业水稻）：
 

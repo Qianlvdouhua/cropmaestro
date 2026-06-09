@@ -41,7 +41,7 @@ def _get_pool():
         port=int(os.getenv("MYSQL_PORT", "3306")),
         user=os.getenv("MYSQL_USER", "root"),
         password=os.getenv("MYSQL_PASSWORD", ""),
-        database=os.getenv("MYSQL_DATABASE", "cropmonster_demo"),
+        database=os.getenv("MYSQL_DATABASE", "cropmaestro_demo"),
         charset="utf8mb4",
         cursorclass=DictCursor,
         maxconnections=10,

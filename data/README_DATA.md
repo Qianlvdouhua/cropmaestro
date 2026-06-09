@@ -13,9 +13,9 @@
 ## 导入
 
 ```bash
-mysql -u root -p cropmonster_demo < schema/ddl/01_bus_rice_data.sql
-mysql -u root -p cropmonster_demo < data/bus_rice_data.sql
-mysql -u root -p cropmonster_demo < schema/ddl/02_bus_rice_cache_results.sql
+mysql -u root -p cropmaestro_demo < schema/ddl/01_bus_rice_data.sql
+mysql -u root -p cropmaestro_demo < data/bus_rice_data.sql
+mysql -u root -p cropmaestro_demo < schema/ddl/02_bus_rice_cache_results.sql
 ```
 
 `bus_rice_data.sql` 已包含 `DROP TABLE` 与 `INSERT`，可直接导入；若表已存在且仅需增量数据，请先备份后执行。
