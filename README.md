@@ -1,13 +1,13 @@
-# CropMonster
+# CropMaestro
 
-CropMonster 是一个面向作物种质资源的智能检索框架。本仓库提供脱敏 n8n 工作流、**商业水稻（`bus_rice`）** 四层提示词、MySQL 表结构及商业品种数据导入脚本。
+CropMaestro 是一个面向作物种质资源的智能检索框架。本仓库提供脱敏 n8n 工作流、**商业水稻（`bus_rice`）** 四层提示词、MySQL 表结构及商业品种数据导入脚本。
 
 ## 快速开始
 
 1. 执行 [schema/ddl](schema/ddl) 并导入 [data/bus_rice_data.sql](data/bus_rice_data.sql)
 2. 启动 [backend/](backend/)（状态 API 5000；可选 GS API 8000）
 3. 按 [docs/setup.md](docs/setup.md) 将 `prompts/bus_rice/` 挂载到 n8n `/data`
-4. 导入 [workflow/CropMonster.workflow.json](workflow/CropMonster.workflow.json)，绑定 MySQL / LLM 凭证
+4. 导入 [workflow/CropMaestro.workflow.json](workflow/CropMaestro.workflow.json)，绑定 MySQL / LLM 凭证
 5. 调用 Webhook 时设置 `"commercialMode": true`（水稻商业库分支）
 
 ## 目录概览
