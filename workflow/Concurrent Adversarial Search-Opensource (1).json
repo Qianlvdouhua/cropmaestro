@@ -1,0 +1,1130 @@
+{
+  "name": "Concurrent Adversarial Search-Opensource",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "// 获取输入数据（来自 SQL 节点）\nconst inputData = $('sql').first().json.data;\n// 获取单位说明\nconst unitInfo = $input.first().json.data;\n\n// 初始化两个输出\nlet convertedData = []; // 字符串数组，供 Switch 节点使用（含单位和链接）\nlet resources = [];     // 对象数组，供前端使用（含单位和链接）\n\n// 基础链接\nconst BASE_URL = \"https://germplasm.cgris.net/geneshare/seed/seed/basicquery?querycondition=\";\n\n// 解析单位信息\nlet unitMap = {};\nif (unitInfo && typeof unitInfo === 'string') {\n  const unitLines = unitInfo.split('\\n').filter(line => line.includes('：'));\n  unitLines.forEach(line => {\n    const [field, unit] = line.split('：');\n    if (field && unit) {\n      unitMap[field.trim()] = unit.trim();\n    }\n  });\n}\n\n// 处理数组情况\nif (Array.isArray(inputData)) {\n  // 1. 先生成 convertedData：为每个 item 添加单位信息和链接后转字符串\n  convertedData = inputData.map(item => {\n    if (typeof item === 'object' && item !== null) {\n      // 创建带单位信息和链接的新对象\n      let itemWithUnitsAndLink = { ...item };\n      \n      // 添加 purchase_link\n      const accessionNumber = item[\"统一编号\"] || item.accession_number || item.germplasm_id || '';\n      const purchase_link = accessionNumber \n        ? `${BASE_URL}${encodeURIComponent(accessionNumber)}`\n        : null;\n      itemWithUnitsAndLink.purchase_link = purchase_link;\n      \n      // 根据单位说明为数值型字段添加单位\n      Object.keys(unitMap).forEach(field => {\n        if (itemWithUnitsAndLink.hasOwnProperty(field)) {\n          const value = itemWithUnitsAndLink[field];\n          if (typeof value === 'number' || (!isNaN(value) && value !== null && value !== undefined && value !== '')) {\n            itemWithUnitsAndLink[field] = `${value} ${unitMap[field]}`;\n          }\n        }\n      });\n      \n      return JSON.stringify(itemWithUnitsAndLink);\n    }\n    return String(item);\n  });\n\n  // 2. 再生成 resources：为每个 item 添加单位信息和 purchase_link\n  resources = inputData.map(item => {\n    if (typeof item === 'object' && item !== null) {\n      // 创建带单位信息的新对象\n      let itemWithUnits = { ...item };\n      \n      // 添加 purchase_link\n      const accessionNumber = item[\"全国统一编号\"] || item.accession_number || item.germplasm_id || '';\n      const purchase_link = accessionNumber \n        ? `${BASE_URL}${encodeURIComponent(accessionNumber)}`\n        : null;\n      \n      // 根据单位说明为数值型字段添加单位\n      Object.keys(unitMap).forEach(field => {\n        if (itemWithUnits.hasOwnProperty(field)) {\n          const value = itemWithUnits[field];\n          if (typeof value === 'number' || (!isNaN(value) && value !== null && value !== undefined && value !== '')) {\n            itemWithUnits[field] = `${value} ${unitMap[field]}`;\n          }\n        }\n      });\n      \n      return { ...itemWithUnits, purchase_link };\n    }\n    return item;\n  });\n\n} \n// 处理单个对象\nelse if (typeof inputData === 'object' && inputData !== null) {\n  // convertedData 用带单位信息和链接的对象转字符串\n  let itemWithUnitsAndLink = { ...inputData };\n  \n  // 添加 purchase_link\n  const accessionNumber = inputData[\"统一编号\"] || inputData.accession_number || inputData.germplasm_id || '';\n  const purchase_link = accessionNumber \n    ? `${BASE_URL}${encodeURIComponent(accessionNumber)}`\n    : null;\n  itemWithUnitsAndLink.purchase_link = purchase_link;\n  \n  // 根据单位说明为数值型字段添加单位\n  Object.keys(unitMap).forEach(field => {\n    if (itemWithUnitsAndLink.hasOwnProperty(field)) {\n      const value = itemWithUnitsAndLink[field];\n      if (typeof value === 'number' || (!isNaN(value) && value !== null && value !== undefined && value !== '')) {\n        itemWithUnitsAndLink[field] = `${value} ${unitMap[field]}`;\n      }\n    }\n  });\n  \n  convertedData = [JSON.stringify(itemWithUnitsAndLink)];\n  \n  // resources 添加单位信息和链接\n  let itemWithUnits = { ...inputData };\n  \n  // 根据单位说明为数值型字段添加单位\n  Object.keys(unitMap).forEach(field => {\n    if (itemWithUnits.hasOwnProperty(field)) {\n      const value = itemWithUnits[field];\n      if (typeof value === 'number' || (!isNaN(value) && value !== null && value !== undefined && value !== '')) {\n        itemWithUnits[field] = `${value} ${unitMap[field]}`;\n      }\n    }\n  });\n  \n  resources = [{ ...itemWithUnits, purchase_link }];\n\n} \n// 其他基本类型\nelse {\n  convertedData = [String(inputData)];\n  resources = [];\n}\n\n// 返回结果\nreturn [{\n  json: {\n    convertedData,\n    resources\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        704,
+        448
+      ],
+      "id": "7022c075-4b74-47cb-828c-aefefc2b4e94",
+      "name": "转换成字符串格式"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO chat_memory (session_id, question, answer, query_hash , `sql`,varieties,graphConfig)\nVALUES (\n  '{{ $('When Executed by Another Workflow').last().json.sessionId }}',\n  '{{ $json.safe_question }}',\n  '{{ $json.answer }}',\n  '{{ $('Batch storage and query_hash').last().json.query_hash }}',\n  '{{ $json.sql }}',\n  '{{ $('When Executed by Another Workflow').last().json.varieties }}',\n  '{{ JSON.stringify($('graphConfig1').item.json.graphConfig) }}'\n);\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        2256,
+        448
+      ],
+      "id": "664628db-1c26-4156-a491-ee07674b78f5",
+      "name": "MySQL3",
+      "credentials": {
+        "mySql": {
+          "id": "E2X16jF7wrIlD0d1",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "50b94794-6aa4-4b4f-a1bd-4bed0bcaaae0",
+              "name": "回答",
+              "value": "不好意思，未能查询到符合要求的品种资源",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "02898162-ac11-4e15-996f-a450ac483183",
+      "name": "Edit Fields8"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "value": "200872a5-fe11-8065-9fce-cda8863db400",
+          "mode": "list",
+          "cachedResultName": "contextmemory",
+          "cachedResultUrl": "https://www.notion.so/200872a5fe1180659fcecda8863db400"
+        },
+        "title": "=",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "提问|title",
+              "title": "={{ $('When Executed by Another Workflow').first().json.chatInput }}"
+            },
+            {
+              "key": "SessionID|rich_text",
+              "textContent": "={{ $('拼接上下文').last().json.sessionID }}"
+            },
+            {
+              "key": "回答|rich_text",
+              "textContent": "={{ $('Respond to Webhook7').item.json['回答'] }}"
+            },
+            {
+              "key": "sql语句|rich_text",
+              "textContent": "={{ $('sql').item.json.sql }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        1104,
+        -96
+      ],
+      "id": "75c324fa-1152-49e8-b6dc-5bf3efe53b9e",
+      "name": "Notion7",
+      "executeOnce": false,
+      "alwaysOutputData": false,
+      "credentials": {
+        "notionApi": {
+          "id": "VxeaJiZ095N6cFBn",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO chat_memory (session_id, question , answer, varieties)\nVALUES ('{{ $('When Executed by Another Workflow').last().json.sessionId }}', '{{ $('When Executed by Another Workflow').last().json.chatInput }}', '不好意思，未能查询到符合要求的品种资源','{{ $('When Executed by Another Workflow').last().json.varieties }}');\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        160,
+        0
+      ],
+      "id": "f5d1a8d1-aa65-4e9f-970c-6bcbafe74136",
+      "name": "MySQL6",
+      "credentials": {
+        "mySql": {
+          "id": "E2X16jF7wrIlD0d1",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        864,
+        -112
+      ],
+      "id": "a1ab0eef-6a56-4acd-934d-a85de00434cd",
+      "name": "Respond to Webhook7"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.cleanedSQL }}",
+        "options": {
+          "detailedOutput": true
+        }
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        -400,
+        208
+      ],
+      "id": "7438ab80-fa7e-4d15-9956-239d44525a31",
+      "name": "sql",
+      "credentials": {
+        "mySql": {
+          "id": "E2X16jF7wrIlD0d1",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "86f3efbd-03ff-4541-a203-f30c7726ec64",
+              "name": "answer",
+              "value": "={{ $('Escape the / in answer').item.json.answer }}",
+              "type": "string"
+            },
+            {
+              "id": "86f9db38-e1a5-4066-b762-7050a271e198",
+              "name": "graphConfig",
+              "value": "={{ $('graphConfig1').item.json.graphConfig }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2544,
+        448
+      ],
+      "id": "d9e0e057-2135-430e-91d5-3eb290a5aff6",
+      "name": "Edit Fields7"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -1824,
+        432
+      ],
+      "id": "c70a33b8-d17e-415e-9346-91818db1f1b1",
+      "name": "Extract from File2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "86f3efbd-03ff-4541-a203-f30c7726ec64",
+              "name": "answer",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -16,
+        720
+      ],
+      "id": "ffc548e8-1940-49db-8dce-6040f3788f13",
+      "name": "Edit Fields10"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO chat_memory (session_id, question, answer)\nVALUES ('{{ $('When Executed by Another Workflow').last().json.sessionId }}', '{{ $('When Executed by Another Workflow').last().json.chatInput }}', '{{ $json.answer }}');\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        176,
+        720
+      ],
+      "id": "3d47180b-16be-4ad8-bbe7-a34c56993e9b",
+      "name": "MySQL8",
+      "credentials": {
+        "mySql": {
+          "id": "E2X16jF7wrIlD0d1",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -1488,
+        432
+      ],
+      "id": "3ab4ac15-7101-49da-b68b-a7fc6c663bdc",
+      "name": "Extract from File4"
+    },
+    {
+      "parameters": {
+        "fileSelector": "=/data/{{ $('When Executed by Another Workflow').last().json.varieties }}_data.txt",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -1984,
+        432
+      ],
+      "id": "6272a7f8-f1f6-4f55-b821-75d960d447e6",
+      "name": "table_structure"
+    },
+    {
+      "parameters": {
+        "fileSelector": "=/data/Prompt/{{ $('When Executed by Another Workflow').last().json.varieties }}_score_prompt.txt",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -1648,
+        432
+      ],
+      "id": "2d3e84d6-6f29-403f-9aab-6b5ed2295a87",
+      "name": "prompt"
+    },
+    {
+      "parameters": {
+        "fileSelector": "=/data/Prompt/rule/{{ $('When Executed by Another Workflow').last().json.varieties }}_rule.txt",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        848,
+        448
+      ],
+      "id": "2ccb0044-bd00-41b6-8422-3c6da3d7f585",
+      "name": "Read/Write Files from Disk3"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        992,
+        448
+      ],
+      "id": "d8f48324-97f0-432e-a7f3-051e916d2f22",
+      "name": "Extract from File5"
+    },
+    {
+      "parameters": {
+        "jsCode": "const session_id = $('When Executed by Another Workflow').last().json.sessionId;\nconst query_task = $('When Executed by Another Workflow').last().json.chatInput;\nconst query_hash = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);\n\n// 动态获取字段\nconst datatable =$('When Executed by Another Workflow').first().json.database;\n\nconst fieldMap = {\n  wheat_data: [\"作物名称\", \"种质名称\", \"全国统一编号\", \"原全国统一编号\", \"芒\", \"壳色\", \"粒色\", \"冬春\", \"熟性\", \"穗粒数\", \"穗长\", \"株高\", \"千粒重\", \"粗蛋白\", \"赖氨酸\", \"沉淀值\", \"硬度\", \"容重\", \"抗旱性\", \"耐涝性\", \"芽期耐盐\", \"苗期耐盐\", \"田间抗寒性\", \"人工抗寒性\", \"条锈病抗性\", \"叶锈病抗性\", \"秆锈病抗性\", \"白粉反应型\", \"黄矮病抗性\", \"赤霉病抗性\", \"根腐叶病抗性\", \"根腐穗抗性\", \"纹枯病抗性\", \"长管蚜抗性\", \"二叉蚜抗性\", \"备注\", \"共享类型\", \"原产国\", \"原产地\"],\n rice_data: [\n  \"作物名称\", \"原全国统一编号\", \"全国统一编号\", \"种质名称\", \"籼粳亚种\", \"早中晚稻\", \"水陆\",\n  \"粘糯\", \"播种期\", \"抽穗期\", \"成熟期\", \"全生育期\", \"株高\", \"穗长\", \"有效穗数\", \"穗粒数\",\n  \"结实率\", \"千粒重\", \"粒长\", \"粒宽\", \"谷粒长宽比\", \"谷粒形状\", \"剑叶长\", \"剑叶宽\",\n  \"种皮色\", \"颖尖色\", \"颖壳色\", \"共享类型\", \"原产国\", \"原产地\"\n],\n  bus_rice_data: [\n  \"作物名称\", \"全国统一编号\", \"种质名称\", \"籼粳亚种\", \"早中晚稻\", \"粘糯\", \"播种期\", \"全生育期\",\n  \"株高\", \"穗长\", \"有效穗数\", \"穗粒数\", \"结实率\", \"千粒重\", \"粒长\", \"谷粒长宽比\", \"谷粒形状\",\n  \"颖尖色\", \"颖壳色\", \"原产国\", \"原产地\"\n],\n   corn_data: [\n  \"作物名称\", \"全国统一编号\", \"原全国统一编号\", \"种质名称\", \"播种期\", \"出苗期\", \"播种至出苗日数\",\n  \"株高\", \"穗位高\", \"主茎叶片数\", \"抽雄日期\", \"吐丝日期\", \"生育日数\", \"成熟期\", \"穗形\", \"粒型\",\n  \"粒色\", \"轴色\", \"穗长\", \"穗粗\", \"千粒重\", \"粗脂肪\", \"粗蛋白\", \"粗总淀粉\", \"赖氨酸\", \"共享类型\",\n  \"原产国\", \"原产地\"\n],\n  millet_data: [\n  \"作物名称\", \"全国统一编号\", \"原全国统一编号\", \"种质名称\", \"抽穗日数\", \"生育期\", \"粳糯性\", \"穗型\",\n  \"粒色\", \"米色\", \"幼苗叶色\", \"幼苗鞘色\", \"刺毛长度\", \"穗松紧\", \"分蘖数\", \"一株茎数\", \"主穗长度\",\n  \"主茎长度\", \"主茎直径\", \"主茎节数\", \"单株秆重\", \"单株穗重\", \"单株粒重\", \"千粒重\", \"粗蛋白\",\n  \"粗脂肪\", \"赖氨占样品\", \"赖氨占蛋白\", \"抗旱性\", \"谷瘟病级别\", \"谷瘟病抗性\", \"蝇被害株率\",\n  \"蝇被害指数\", \"蝇抗性级别\", \"粟芒蝇评价\", \"谷锈严重度\", \"谷锈病级\", \"谷锈反应型\", \"白发病病率\",\n  \"白发病抗性\", \"玉米螟抗性\", \"黑穗病病率\", \"黑穗病病级\", \"黑穗病评价\", \"线虫病指\", \"共享类型\",\n  \"原产国\", \"原产地\"\n],\n  soybean_data: [\n  \"作物名称\", \"原全国统一编号\", \"全国统一编号\", \"种质名称\", \"类型\", \"生育/份\", \"生育日数\",\n  \"粒色\", \"子叶色\", \"脐色\", \"百粒重\", \"粒形\", \"生长习性\", \"结荚习性\", \"茸毛色\", \"花色\",\n  \"株高\", \"叶形\", \"粗蛋白\", \"粗脂肪\", \"共享类型\", \"原产国\", \"原产地\"\n],\n  buckwheat_data: [\n  \"作物名称\", \"学名\", \"种质名称\", \"全国统一编号\", \"原全国统一编号\", \"株型\", \"茎色\", \"叶\",\n  \"花色\", \"籽粒颜\", \"籽粒形状\", \"腹沟\", \"棱翅\", \"株高\", \"主茎节数\", \"主茎分枝数\", \"生育日数\",\n  \"落粒性\", \"倒伏性\", \"单株粒重\", \"千粒重\", \"共享类型\", \"原产国\", \"原产地\"\n],\n  barley_data: [\n\"作物名称\", \"种质名称\", \"种质外文名\", \"全国统一编号\", \"原全国统一编号\", \"科名\", \"属名\", \"种名\", \"学名\",\n\"冬春性\", \"生育周期\", \"当地成熟型\", \"播种期\", \"出苗期\", \"生长习性\", \"株型\", \"抽穗期\", \"成熟期\",\n\"分蘖力\", \"株高\", \"单株穗数\", \"茎秆直径\", \"叶耳色\", \"叶色\", \"叶长\", \"叶宽\",\n\"芒形\", \"芒性\", \"棱型\", \"穗姿\", \"穗分枝\", \"穗和芒色\", \"穗长\", \"穗轴茸毛\", \"侧小穗\", \"护颖宽窄\", \"穗密度\", \"稃色\", \"壳色\", \"皮裸性\",\n\"小穗数\", \"穗粒数\", \"粒形\", \"粒色\", \"千粒重\", \"总淀粉\", \"粗蛋白\", \"赖氨酸\", \"品质\", \"主要用途\",\n\"赤霉病抗性\", \"赤霉病穗率\", \"赤霉病指数\",\n\"黄矮严重度\", \"黄矮抗性\", \"黄花发病率\", \"黄花黄化度\", \"黄花叶抗性\",\n\"耐涝级别\", \"耐盐级别\", \"条纹病病率\", \"条纹病抗性\", \"抗旱级别\",\n\"原产地\", \"原产国\", \"来源国\"\n],\n  oats_data: [\n  \"作物名称\", \"全国统一编号\", \"原全国统一编号\", \"种质名称\", \"幼苗习性\", \"幼苗颜色\", \"籽粒类型\",\n  \"穗型\", \"小穗型\", \"株高\", \"穗长\", \"单株粒重\", \"主穗粒重\", \"千粒重\", \"有效分蘖\", \"轮层数\",\n  \"生育期\", \"共享类型\", \"原产国\", \"原产地\"\n],\n  peanut_data: [\n  \"作物名称\", \"种质名称\", \"原全国统一编号\", \"全国统一编号\", \"植物学类型\", \"种皮颜色\", \"每荚粒数\",\n  \"主茎高\", \"第一侧枝长\", \"总枝数\", \"单株饱果数\", \"单株果重\", \"百果重\", \"百仁重\", \"百果仁重\",\n  \"出仁率\", \"含油量\", \"蛋白质含量\", \"油酸C18:1\", \"亚油酸C18:2\", \"棕榈酸C16:0\", \"硬脂酸C18:0\",\n  \"花生酸C20:0\", \"花生烯酸C20:1\", \"山嵛酸C22:0\", \"共享类型\", \"原产国\", \"原产地\"\n],\n  proso_data: [\n  \"作物名称\", \"种质名称\", \"全国统一编号\", \"原全国统一编号\", \"株高\", \"主穗长\", \"主茎节数\",\n  \"花序色\", \"穗型\", \"粒色\", \"米色\", \"单株粒重\", \"千粒重\", \"生育日数\", \"落粒性\", \"倒伏性\",\n  \"黑穗病\", \"苗期耐盐\", \"芽期耐盐\", \"耐盐性\", \"粗蛋白\", \"粗脂肪\", \"赖氨酸\", \"粳糯性\",\n  \"共享类型\", \"原产国\", \"原产地\"\n],\n  rapeseed_data: [\n  \"作物名称\", \"全国统一编号\", \"原全国统一编号\", \"种质名称\", \"生育日数\", \"成熟期\", \"叶型\", \"花色\",\n  \"种皮色\", \"株高\", \"分枝高度\", \"全株角果数\", \"一次分枝数\", \"每果粒数\", \"千粒重\", \"菌核病抗性\",\n  \"病毒病抗性\", \"霜霉病抗性\", \"含油率\", \"硫甙含量\", \"棕榈酸含量\", \"硬脂酸含量\", \"油酸含量\",\n  \"亚油酸含量\", \"亚麻酸含量\", \"花生烯酸含量\", \"芥酸含量\", \"共享类型\", \"原产国\", \"原产地\"\n],\n  sorghum_data: [\n  \"作物名称\", \"全国统一编号\", \"原统一编号\", \"种质名称\", \"芽鞘色\", \"幼苗色\", \"株高\", \"茎粗\",\n  \"主脉色\", \"穗型\", \"穗形\", \"穗长\", \"穗柄长\", \"颖壳包皮度\", \"壳色\", \"粒色\", \"穗粒重\", \"千粒重\",\n  \"生育日数\", \"分蘖性\", \"倒伏性\", \"着壳率\", \"角质率\", \"锤度\", \"粗蛋白\", \"赖氨占样品\", \"赖氨占蛋白\",\n  \"单宁\", \"水份\", \"总淀粉\", \"直链淀粉\", \"支链淀粉\", \"耐旱性\", \"芽期耐盐性\", \"苗期耐盐性\", \"耐瘠性\",\n  \"苗期耐冷性\", \"灌浆耐冷性\", \"丝黑病率2\", \"丝黑抗级2\", \"丝黑评价2\", \"丝黑抗级3\", \"丝黑评价3\",\n  \"高粱蚜抗级\", \"高粱蚜评价\", \"玉米螟抗级\", \"玉米螟评价\", \"靶斑病抗级\", \"靶斑病评价\", \"共享类型\",\n  \"原产国\", \"原产地\"\n]\n};\n\nconst validFields = fieldMap[datatable] || [];\n\nreturn $json.data.map(item => {\n  const cleaned = Object.keys(item).reduce((acc, key) => {\n    if (validFields.includes(key)) {\n      acc[key] = item[key];\n    }\n    return acc;\n  }, {});\n\n  return {\n    json: {\n      ...cleaned,\n      session_id,\n      query_task,\n      query_hash\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        432
+      ],
+      "id": "8c699036-498b-41a3-9a72-1f75957b0b89",
+      "name": "Batch storage and query_hash"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ========================\n// 1. 安全获取输入值 & 数据清洗\n// ========================\nconst contextNode = $(\"When Executed by Another Workflow\").last()?.json;\nconst extractionNode = $(\"Extract from File2\").item?.json;\n\n// 辅助函数：防止对象/数组变成 [object Object]\nconst safeStringify = (val, defaultVal) =>\n  (typeof val === 'object') ? JSON.stringify(val) : (val || defaultVal);\n\n// ✅ 修改点：从第一个触发工作流的节点中获取 context_query\nconst rawContextQuery = $(\"When Executed by Another Workflow\").first()?.json?.context_query;\nconst prompt = rawContextQuery \n  ? String(rawContextQuery).replace(/\\n+/g, ' ').trim() \n  : '无上下文查询信息';\n\nconst varieties = contextNode?.varieties || '未知作物';\nconst datatable = `${varieties}_data`; // 假设表名规则\nconst mining = contextNode?.mining?.replace(/\\n+/g, ' ') || '查询建议缺失';\nconst keywords = contextNode?.keywords || '';\n\n// 字段与规则 (使用 safeStringify)\nconst fieldList = safeStringify(extractionNode?.data, '字段信息缺失');\nconst sqlRules = safeStringify($(\"Extract from File4\").item?.json?.data, '字段规范缺失');\n\n// 获取用户类型（默认 B 类 - 普通用户）\nconst userType = contextNode?.userType || 'B';\n\n// ========================\n// 2. 商业模式与权限逻辑核心\n// ========================\n// 获取商业模式标识 (兼容多层级结构和不同类型)\nconst rawInput = $(\"When Executed by Another Workflow\")?.first()?.json;\nconst commercialModeRaw =\n  rawInput?.commercialMode ??\n  rawInput?.body?.commercialMode ??\n  rawInput?.data?.commercialMode ??\n  false;\n\n// 兼容 true, \"true\", 1, \"1\"\nconst isCommercialMode = [true, 'true', '1', 1].includes(commercialModeRaw);\n\nlet accessCondition = \"1=1\";\nlet accessDescription = \"\";\nlet needsPermissionFilter = false; // 标记是否需要在 SQL 中强制加 WHERE\n\nif (isCommercialMode) {\n  // 商业版：全开\n  accessDescription = \"✅ [商业版环境] 全库资源开放，无行级权限限制。\";\n  needsPermissionFilter = false;\n} else {\n  // 非商业版：基于用户类型的细分\n  switch (userType) {\n    case 'C':\n      // C类：特权用户（全量查询，含 A/B/不公开）\n      accessDescription = \"🚀 [C类用户] 管理员/特权身份，拥有全库访问权限，无需过滤共享类型。\";\n      needsPermissionFilter = false;\n      break;\n\n    case 'A':\n      // A类：标准用户（A + B）\n      accessCondition = \"`共享类型` IN ('A类', 'B类')\";\n      accessDescription = \"当前为【A类用户】，仅可访问 A类 + B类资源。\";\n      needsPermissionFilter = true;\n      break;\n\n    case 'B':\n    case 'D':\n      // B类 & D类（游客）：仅 B类\n      const typeName = userType === 'D' ? \"游客\" : \"普通用户\";\n      accessCondition = \"`共享类型` = 'B类'\";\n      accessDescription = `⚠️ [${userType}类用户 - ${typeName}] 严格限制：仅可访问 \\`共享类型\\` 为 'B类' 的公开资源。`;\n      needsPermissionFilter = true;\n      break;\n\n    default:\n      // 兜底逻辑：强制最低权限\n      accessCondition = \"`共享类型` = 'B类'\";\n      accessDescription = \"用户类型未知，系统强制按【B类】最低权限处理。\";\n      needsPermissionFilter = true;\n  }\n}\n\n// ========================\n// 3. 构造 User Prompt\n// ========================\nconst userPrompt = [\n  `提示：${prompt}`,\n  `用户任务相关作物类别：${varieties}`,\n  `${varieties}的数据表：${datatable}`,\n  `用户类型：${userType}类`,\n  `权限说明：${accessDescription}`,\n  `字段信息如下：\\n${fieldList}`,\n  `查询意见是：${mining}`\n].join('\\n');\n\n// ========================\n// 4. 构造 System Prompt (动态权限注入)\n// ========================\n// 动态生成权限说明部分\nlet accessRuleSection = \"\";\nif (needsPermissionFilter) {\n  // 强制限制\n  accessRuleSection = `✅ 新增硬性规则（权限控制）：\\n${accessDescription}\\n因此，**必须**在 WHERE 子句中加入：(${accessCondition})，作为最基础的准入条件，不达标者直接排除。`;\n} else {\n  // 全量开放\n  accessRuleSection = `✅ 当前为商业版数据库或特权模式，无“共享类型”字段限制，所有用户均可访问全部资源，**无需**添加相关权限过滤。`;\n}\n\nconst systemPrompt = [\n  `你是一个经验丰富的 MySQL 数据库专家，擅长基于用户意图自动生成符合 MYSQL 规范的 SQL 查询语句，查询表 ${datatable}，并能根据复杂的评分标准、属性规则和字段限定公平打分，从 ${varieties} 种质资源数据库中挖掘出最优资源。`,\n  `请围绕关键词中的字段指标构造 SQL 语句，关键词是：${keywords}。\\n`,\n  `【你的任务】`,\n  `根据用户输入的任务，匹配表中字段，结合查询建议，生成一条合法、可执行、具评分逻辑的 SQL 查询语句。`,\n  `注意：SELECT 子句中必须包含“全国统一编号”和“种质名称”字段，确保每条记录可追溯。\\n`,\n  `### 🔐 权限与安全控制`,\n  accessRuleSection,\n  `\\n`,\n  `### 📋 表结构与规范`,\n  `查询表 ${datatable} 有以下需要注意的事项：`,\n  `${sqlRules}\\n`,\n  \n  // 🎯 新增：阶梯赋分与严惩劣质数据逻辑\n  `### 🎯 智能筛选与阶梯赋分逻辑（核心）`,\n  `在构建 SELECT 中的评分字段（如 total_score）时，必须对与关键词 ${keywords} 相关的指标进行高颗粒度的阶梯式加权打分：`,\n  `1. **高颗粒度阶梯赋分法**：数值型字段必须至少划分 4~5 个以上的评分梯度（最优区间得 0 分，偏离越大，分值惩罚呈指数级上升）。`,\n  `   - ✅ 正确要求：例如目标值为 70-120，则 70-120 得 0 分；60-130 得 15 分；50-140 得 40 分；极端偏离的值（如 10-20）必须给予极高惩罚（如 200 分或 300 分）。`,\n  `   - ❌ 错误示范：只写一个理想区间，剩下的全归入 ELSE 罚一个小分数。`,\n  `2. **极端劣质值的惩罚必须大于 NULL 值**：坚决阻断劣质数据上位！如果一个属性值极端偏离目标范围，它的惩罚分数必须远高于“数据缺失(NULL)”。`,\n  `3. **NULL 值惩罚标准**：核心关键性状缺失罚 100 分，一般辅助性状缺失罚 60 分。（注意：极端劣质值的 ELSE 惩罚应设置在 150~300 分之间，确保被淘汰）。`,\n  `4. **枚举型字段拉大分差**：按 优→劣 顺序拉大分差（如：高抗=0，抗=10，中抗=30，感病=150，高感=300）。\\n`,\n\n  `### ⚙️ 共性语法规范`,\n  `①【字段使用与语法规范】`,\n  `* 字段必须全部来自表字段，不可虚构、拼错或缺失空格；`,\n  `* 严格遵守字段类型（如 varchar / decimal / tinyint）；`,\n  `* 禁止使用 REGEXP、TRIM、NULLIF(... IS NULL, ...) 等非法结构；`,\n  `* 所有 IFNULL(expr, default) 参数仅限两个；禁止表达式中嵌套 AS；`,\n  `  错误示例：(IFNULL(字段, 0) AS a + ...) ❌\\n`,\n  `②【表达式结构与 AS 使用规范】`,\n  `* 单一字段表达式可命名：IFNULL(字段, 默认值) AS 别名；`,\n  `* 多项评分项相加后需整体命名：`,\n  `  (CASE ... END + CASE ... END) AS total_score；`,\n  `* 禁止在表达式中间使用 AS。\\n`,\n  `③【CASE / 拼写 / 括号防错】`,\n  `* 所有 CASE WHEN ... THEN ... END 必须完整；WHEN 后必须有空格；`,\n  `* 所有 IF(...)、CASE 表达式必须闭合括号；`,\n  `* 运算符前后留空格，字段拼写准确。\\n`,\n  `④【数据完整性评分逻辑】`,\n  `当用户任务中出现“数据完整”“字段齐全”等关键词时：`,\n  `1. 每个 NULL 或 '' 计为 1 分；`,\n  `2. 定义 missing_count 字段统计缺失数；`,\n  `3. 按 missing_count ASC 排序；`,\n  `4. 返回 LIMIT 5 条记录。\\n`,\n  `⑤【字符串写入安全规范】`,\n  `* 所有字符串必须用单引号包裹；`,\n  `* 内部单引号需转义为两个 ''；`,\n  `* 示例：'模型结果为''HR''等级'。\\n`,\n  `⑥【排序语法强制规范】`,\n  `* 必须显式使用 ORDER BY 字段名 ASC|DESC；`,\n  `* 排序字段必须出现在 SELECT 列表中；`,\n  `* 正确结构示例：`,\n  `  SELECT ..., (评分表达式) AS total_score`,\n  `  FROM ${datatable}`,\n  `  ORDER BY total_score ASC`,\n  `  LIMIT 5;`,\n  `\\n【最终输出要求】`,\n  `请仅输出一条合法、结构正确、无语法错误的 SQL 查询语句。`,\n  `SELECT 部分必须包含与关键词 ${keywords} 相关的字段信息，不能只包含“种质名称”。\\n`\n].join('\\n');\n\n// ========================\n// 5. 输出给后续节点\n// ========================\nreturn [\n  {\n    json: {\n      user_prompt: userPrompt,\n      system_prompt: systemPrompt,\n      userType,\n      isCommercialMode,\n      accessCondition,\n      accessDescription,\n      keywords,\n      // 调试用：查看是否触发了强制过滤\n      needsPermissionFilter\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1312,
+        432
+      ],
+      "id": "9ebad68d-0878-4e90-933c-66e4a44f1cb8",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 获取各节点内容\nconst task = $('When Executed by Another Workflow').first().json.context_query || \"（无用户任务）\";\nconst sql = $(\"Refine and validate SQL statements\").item.json.sqlStatements?.[0] || \"（SQL 缺失）\";\nconst data = $(\"转换成字符串格式\").item.json.convertedData || \"（无结果数据）\";\nconst rules = $(\"Extract from File5\").item.json.data || \"（无补充说明）\";\n\n// 构造 user prompt\nconst userPrompt = \n`用户的上下文和个人信息如下：${task}\nSQL 查询语句：${sql}\n查询结果数据（格式化后）：${data}`;\n\n// 构造 system prompt\nconst systemPrompt = \n`你是一个作物资源分析专家，能够根据数据库查询结果、结合用户上下文信息及任务目标，和执行的SQL查询逻辑，输出简明且可信的品种推荐原因。\n\n【你的任务】\n请输出一段简洁的文字，用于展示推荐的种质资源，并放大推荐品种的优势，扬长避短，提升用户信任感。\n${rules}\n\n【结构要求】\n1️⃣ **第一句话：以固定句式开头**\n'经过多轮赋分查询查询后，系统为您筛选出如下资源：'\n然后继续描述推荐资源的优势。\n\n\n2️⃣ **第二句话：直接列出推荐种质名称,且每个名称后面括号里面是该品种的全国统一编号**\n以以下句式开头：\n格式为：推荐品种包括：XXX(全国统一编号)、XXX(全国统一编号)、XXX(全国统一编号) 等。\n种质名称请从查询结果数据中的 “种质名称” 字段中提取，最多列出 8 个。\n\n总结内容应包括：\n- 详细分别描述筛选出的前五个品种有哪些优势；\n- 在引用数值时，必须在其后准确标注该指标的单位（如株高120 cm、千粒重25.3 g、粗蛋白含量14.8%等），确保数据表达完整、规范、可读性强；;\n- 不要堆砌字段，要归纳成自然语言。\n- 分析时不得引入“综合评分”“总得分”“加权指数”等未在原始数据中出现的、基于后期计算或主观赋权的汇总性指标。所有结论必须基于查询结果中资源的自身理化指标值进行描述，禁止虚构或推导不存在的评分体系。\n解释查询逻辑（1~2 句）：\n用通俗语言解释 SQL 是如何筛选的；\n用词专业，语气可信，尽量避免机械式罗列字段名。\n`;\n\n// 返回结构化 prompt\nreturn [\n  {\n    json: {\n      user_prompt: userPrompt,\n      system_prompt: systemPrompt\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1664,
+        448
+      ],
+      "id": "412ea99f-2e3b-430e-961a-9cb98c46a955",
+      "name": "Code6"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "chatInput"
+            },
+            {
+              "name": "sessionId"
+            },
+            {
+              "name": "varieties"
+            },
+            {
+              "name": "mining"
+            },
+            {
+              "name": "database"
+            },
+            {
+              "name": "keywords",
+              "type": "array"
+            },
+            {
+              "name": "commercialMode"
+            },
+            {
+              "name": "userType"
+            },
+            {
+              "name": "context_query"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -2160,
+        432
+      ],
+      "id": "7e546cc6-8a66-4e77-878f-81e376f11a3e",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=用户上下文语境：{{ $('When Executed by Another Workflow').last().json.chatInput }}，\nSQL Query：{{ $('sql').item.json.sql }}\n请根据上述信息生成 json。",
+        "options": {
+          "systemMessage": "# Role\n你是一个精通 SQL 逻辑解析与业务意图分析的专家。你的任务是根据用户的自然语言提问（Context）和执行的 SQL 查询语句（Logic），提取用于前端图表渲染的元数据。\n\n# Input\n1. **User Context**: 用户的原始提问。\n2. **SQL Query**: 系统生成的 SQL 语句（包含 WHERE 筛选条件和 ORDER BY 评分逻辑）。\n\n# Output\n请直接输出一个标准的 JSON 对象，**不要包含任何 Markdown 标记（如 ```json）**。\n\n# Logic for Extraction\n\n## 1. 提取 ideal_ranges (黄金区间)\n请仔细分析 SQL 中的 `WHERE` 子句和 `ORDER BY` 中的 `CASE WHEN` 打分逻辑，提取数值字段的推荐范围：\n\n- **模式 A (显式范围)**: \n  - SQL: `column BETWEEN 70 AND 120`\n  - 提取: `\"column\": [70, 120]`\n- **模式 B (下限阈值)**:\n  - SQL: `column >= 14` 或 `CASE WHEN column >= 15 THEN ...` (意为大于15更优)\n  - 提取: `\"column\": [15, null]` (null 表示无明确上限)\n- **模式 C (上限阈值/负向指标)**:\n  - SQL: `column <= 5` 或 `CASE WHEN column <= 3 THEN ...` (意为越小越优)\n  - 提取: `\"column\": [0, 5]` (物理量下限默认为0)\n- **模式 D (固定值匹配)**:\n  - SQL: `column = 100`\n  - 提取: `\"column\": [95, 105]` (给予微小浮动区间)\n\n> **注意**: \n> 1. 忽略非数值字段（如颜色、地区）。\n> 2. 如果 SQL 中未提及某字段的数值限制，则该字段不出现在 ideal_ranges 中。\n> 3. 优先采纳 `ORDER BY` 中用于打分的阈值（通常代表更精细的优选标准）。\n\n## 2. 生成 title (图表标题)\n结合 User Context 和 SQL 的筛选重点，生成一个简练的标题。\n- **要求**: 18 个汉字以内，不包含特殊符号。\n- **格式**: \"{核心对象}-{分析维度}\"\n- **示例**: \"小偃5号-面包加工适宜性分析\", \"强筋小麦品种多维对比\", \"高产抗病品种筛选结果\"。\n\n# Example\n\n**Input**:\nUser: \"帮我找做面包的小麦\"\nSQL: `... WHERE 硬度 BETWEEN 60 AND 100 ORDER BY CASE WHEN 粗蛋白 >= 15 THEN 0 ELSE 1 END ...`\n\n**Output**:\n{\n  \"title\": \"面包专用小麦-品质指标分析\",\n  \"ideal_ranges\": {\n    \"硬度\": [60, 100],\n    \"粗蛋白\": [15, null]\n  }\n}\n\n# Task\n请根据提供的 User Context 和 SQL Query，生成 Output JSON。"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1120,
+        448
+      ],
+      "id": "1460c3e4-a1aa-4737-b98d-2a69f5e4a2c5",
+      "name": "graphConfig"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================================\n// 1. 获取输入数据\n// ============================================================\n\n// 1.1 获取原始资源数据\nlet rawResources = [];\ntry {\n    const nodeOutput = $('转换成字符串格式');\n    if (nodeOutput && nodeOutput.first) {\n        rawResources = nodeOutput.first().json?.resources || [];\n    }\n} catch (e) {\n    console.log(\"Fallback to $input for resources\");\n    rawResources = $input.first().json?.resources || [];\n}\n\n// 1.2 直接获取作物字段集名称（如 \"wheat_data\"）\nlet dataTypeKey = 'wheat_data'; // 默认兜底\ntry {\n    const cropKey = $('When Executed by Another Workflow').first().json.database;\n    if (typeof cropKey === 'string') {\n        dataTypeKey = cropKey.trim();\n    }\n} catch (e) {\n    console.warn(\"Failed to get crop data key, using default: wheat_data\");\n}\n\n// 定义所有作物的字段白名单\nconst fieldMap = {\n    wheat_data: [\n        \"穗粒数\", \"穗长\", \"株高\", \"千粒重\", \"粗蛋白\", \"赖氨酸\", \"沉淀值\", \"硬度\", \"容重\"\n    ],\n    rice_data: [\n        \"株高\", \"穗长\", \"有效穗数\", \"穗粒数\", \"结实率\", \"千粒重\", \"粒宽\", \"剑叶长\", \"剑叶宽\"\n    ],\n    bus_rice_data: [\n        \"株高\", \"穗长\", \"有效穗数\", \"穗粒数\", \"结实率\", \"千粒重\", \"粒长\"\n    ],\n    corn_data: [\n        \"播种至出苗日数\", \"株高\", \"穗位高\", \"主茎叶片数\", \"生育日数\", \"穗长\", \"穗粗\",\n        \"千粒重\", \"粗脂肪\", \"粗蛋白\", \"粗总淀粉\", \"赖氨酸\"\n    ],\n    millet_data: [\n        \"分蘖数\", \"一株茎数\", \"主穗长度\", \"主茎长度\", \"主茎直径\", \"主茎节数\",\n        \"单株秆重\", \"单株穗重\", \"单株粒重\", \"千粒重\", \"粗蛋白\", \"粗脂肪\", \"赖氨占蛋白\"\n    ],\n    barley_data: [\n        \"株高(cm)\", \"单株穗数\", \"茎秆直径(mm)\", \"叶长(cm)\", \"叶宽(cm)\", \"穗长(cm)\",\n        \"小穗数\", \"穗粒数\", \"千粒重(g)\", \"总淀粉\", \"粗蛋白\", \"赖氨酸\", \"赤霉病穗率\",\n        \"赤霉病指数\", \"黄花发病率\", \"条纹病病率\", \"黄矮严重度\", \"黄花黄化度\"\n    ],\n    sorghum_data: [\n        \"株高\", \"茎粗\", \"穗长\", \"穗柄长\", \"穗粒重\", \"千粒重\", \"着壳率\", \"角质率\", \"锤度\",\n        \"粗蛋白\", \"赖氨占样品\", \"赖氨占蛋白\", \"单宁\", \"水份\", \"总淀粉\", \"直链淀粉\", \"支链淀粉\"\n    ],\n    oats_data: [\n        \"株高\", \"穗长\", \"单株粒重\", \"主穗粒重\", \"千粒重\", \"有效分蘖\", \"轮层数\"\n    ],\n    castor_data: [\n        \"生育期\", \"株高\", \"有效分枝数\", \"有效穗数\", \"果穗长度\", \"百粒重\", \"出仁率\",\n        \"子实含油率\", \"子仁含油率\"\n    ],\n    buckwheat_data: [\n        \"株高\", \"主茎节数\", \"主茎分枝数\", \"生育日数\", \"单株粒重\", \"千粒重\"\n    ],\n    proso_data: [\n        \"株高\", \"主穗长\", \"主茎节数\", \"单株粒重\", \"千粒重\", \"生育日数\", \"粗蛋白\", \"粗脂肪\", \"赖氨酸\"\n    ],\n    rapeseed_data: [\n        \"生育日数\", \"株高\", \"分枝高度\", \"全株角果数\", \"一次分枝数\", \"每果粒数\", \"千粒重\",\n        \"含油率\", \"硫甙含量\", \"棕榈酸含量\", \"硬脂酸含量\", \"油酸含量\", \"亚油酸含量\",\n        \"亚麻酸含量\", \"花生烯酸含量\", \"芥酸含量\"\n    ],\n    soybean_data: [\n        \"生育日数\", \"百粒重\", \"株高\", \"粗蛋白\", \"粗脂肪\"\n    ]\n};\n\n// 获取当前作物对应的合法字段列表\nconst validFields = fieldMap[dataTypeKey] || fieldMap.wheat_data;\nconsole.log(`Using data type: ${dataTypeKey}, ${validFields.length} valid fields`);\n\n// 1.3 解析 LLM 输出（ideal_ranges, title）\nlet llmMeta = { title: \"数据分析\", ideal_ranges: {} };\ntry {\n    const rawOutput = $input.first().json;\n    const possibleFields = ['output', 'text', 'result', 'response'];\n    let llmOutputRaw = '';\n    for (const field of possibleFields) {\n        if (typeof rawOutput[field] === 'string') {\n            llmOutputRaw = rawOutput[field];\n            break;\n        }\n    }\n    if (!llmOutputRaw) throw new Error(\"No LLM output string found\");\n\n    const cleanJsonStr = llmOutputRaw\n        .trim()\n        .replace(/^```(?:json)?\\s*/, '')\n        .replace(/```+$/, '')\n        .trim();\n\n    const parsed = JSON.parse(cleanJsonStr);\n\n    // 清洗 ideal_ranges：只保留 validFields 中的字段（允许 null）\n    const filteredIdealRanges = {};\n    if (parsed.ideal_ranges && typeof parsed.ideal_ranges === 'object') {\n        Object.keys(parsed.ideal_ranges)\n            .filter(key => validFields.includes(key))\n            .forEach(key => {\n                const range = parsed.ideal_ranges[key];\n                if (Array.isArray(range)) {\n                    filteredIdealRanges[key] = range; // 允许 [10, null] 或 [null, 20]\n                }\n            });\n    }\n\n    llmMeta = {\n        title: parsed.title || `【${dataTypeKey.replace('_data', '')}】分析`,\n        ideal_ranges: filteredIdealRanges\n    };\n\n} catch (e) {\n    console.warn(\"LLM meta parse failed, using defaults:\", e.message);\n    llmMeta = {\n        title: `【${dataTypeKey.replace('_data', '')}】分析`,\n        ideal_ranges: {}\n    };\n}\n\n// 如果没有原始数据，返回空配置\nif (rawResources.length === 0) {\n    return {\n        json: {\n            graphConfig: null\n        }\n    };\n}\n\n// ============================================================\n// 2. 统计字段缺失率（在清洗前！）\n// ============================================================\nconst completeness = {}; // 字段 → 有效数值比例\n\nvalidFields.forEach(key => {\n    let validCount = 0;\n    let totalCount = 0;\n\n    for (const item of rawResources) {\n        if (!item || typeof item !== 'object') continue;\n        if (!(key in item)) continue;\n\n        const val = item[key];\n        totalCount++;\n\n        // 判断是否为有效数值\n        if (val == null) {\n            continue;\n        } else if (typeof val === 'number' && !isNaN(val)) {\n            validCount++;\n        } else if (typeof val === 'string') {\n            const num = parseFloat(val.replace(/[^-\\d.]/g, ''));\n            if (!isNaN(num)) {\n                validCount++;\n            }\n        }\n    }\n\n    completeness[key] = totalCount > 0 ? validCount / totalCount : 0;\n});\n\n// ============================================================\n// 3. 数据清洗（提取数值）\n// ============================================================\nconst cleanedResources = rawResources\n    .filter(item => item && typeof item === 'object')\n    .map(item => {\n        const newItem = { ...item };\n        for (const key in newItem) {\n            let val = newItem[key];\n\n            if (val == null) {\n                newItem[key] = 0;\n                continue;\n            }\n\n            if (typeof val === 'string') {\n                const match = val.match(/-?\\d+(?:\\.\\d+)?/);\n                if (match) {\n                    const num = parseFloat(match[0]);\n                    if (!isNaN(num)) {\n                        newItem[key] = num;\n                    } else {\n                        newItem[key] = 0;\n                    }\n                } else {\n                    newItem[key] = 0;\n                }\n            }\n        }\n        return newItem;\n    });\n\n// ============================================================\n// 4. 字段筛选：仅保留 validFields 中且缺失率 <20% 的字段\n// ============================================================\nconst selectedKeys = validFields\n    .filter(key => completeness[key] > 0.8)  // 真实缺失率控制\n    .filter(key => {\n        // 确保该字段在 cleanedResources 中至少有一个非零值（避免全0字段）\n        const values = cleanedResources.map(r => r[key]).filter(v => typeof v === 'number' && !isNaN(v));\n        return values.length > 0 && Math.max(...values) > 0;\n    })\n    .slice(0, 5); // 最多 5 个\n\nif (selectedKeys.length === 0) {\n    return {\n        json: {\n            graphConfig: null\n        }\n    };\n}\n\n// ============================================================\n// 5. 图表类型决策\n// ============================================================\nconst rowsCnt = cleanedResources.length;\nconst colsCnt = selectedKeys.length;\nlet chartType = \"bar\";\n\nif (colsCnt >= 3 && rowsCnt > 3) {\n    chartType = \"parallel\";\n} else if (colsCnt >= 3 && rowsCnt <= 3) {\n    chartType = \"radar\";\n} else {\n    chartType = \"bar\";\n}\n\n// ============================================================\n// 6. 构建 dimensions（坐标轴配置）\n// ============================================================\nconst dimensions = selectedKeys.map(key => {\n    const colValues = cleanedResources.map(r => r[key]);\n    const dataMax = Math.max(...colValues);\n\n    const dim = {\n        dataKey: key,\n        label: key,\n        min: 0,\n        max: Math.ceil(dataMax * 1.1),\n        axisDirection: /病|倒伏|发病率|病率|指数|受害|率$/.test(key) ? \"inverted\" : \"normal\"\n    };\n\n    // === 关键：即使 idealMin/idealMax 为 null 也要显示字段 ===\n    const idealRange = llmMeta.ideal_ranges[key];\n    if (Array.isArray(idealRange)) {\n        dim.idealMin = idealRange[0]; // 允许 null\n        dim.idealMax = idealRange[1]; // 允许 null\n    }\n\n    return dim;\n});\n\n// ============================================================\n// 7. 返回结果（不包含 cropDataKey）\n// ============================================================\nreturn {\n    json: {\n        graphConfig: {\n            chartType,\n            title: llmMeta.title,\n            dimensions\n        }\n    }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        448
+      ],
+      "id": "9639370c-cd4c-4f3d-9ec6-6a8e2d23d3e4",
+      "name": "graphConfig1"
+    },
+    {
+      "parameters": {
+        "fileSelector": "=/data/Prompt/unit/{{ $('When Executed by Another Workflow').last().json.varieties }}_unit.txt",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        384,
+        448
+      ],
+      "id": "11d0bad3-21fd-4a5e-88b2-d045ca059444",
+      "name": "Read/Write Files from Disk7"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "binaryPropertyName": "=data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        544,
+        448
+      ],
+      "id": "4f0e6de7-9487-4b78-914b-42540f993feb",
+      "name": "Extract from File7"
+    },
+    {
+      "parameters": {
+        "content": "## Save process\n",
+        "height": 220,
+        "width": 620,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2176,
+        384
+      ],
+      "id": "f4cff9c3-f437-48b1-b4df-2b27ab05c4cd",
+      "name": "Sticky Note26"
+    },
+    {
+      "parameters": {
+        "content": "## Summary\n\n",
+        "height": 232,
+        "width": 440,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1616,
+        384
+      ],
+      "id": "3d7985da-a0c5-4e18-8f0b-0dcab521f4fc",
+      "name": "Sticky Note35"
+    },
+    {
+      "parameters": {
+        "content": "## SQL Cleaning\n\n",
+        "height": 208,
+        "width": 496
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -928,
+        384
+      ],
+      "id": "194a0d65-83ab-4ab4-9708-4fefe67cb8d1",
+      "name": "Sticky Note37"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"\",\n  \"temperature\": 0.6,\n  \"top_p\": 0.95,\n  \"top_k\": 20,\n  \"min_p\": 0.0,\n  \"presence_penalty\": 0.0,\n  \"repetition_penalty\": 1.0,\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": {{ JSON.stringify($json.system_prompt) }}\n    },\n    {\n      \"role\": \"user\",\n      \"content\": {{ JSON.stringify($json.user_prompt) }}\n    }\n  ]\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1136,
+        432
+      ],
+      "id": "edf74e7c-a083-4b1a-aac2-46e4d4097bb1",
+      "name": "Score Query"
+    },
+    {
+      "parameters": {
+        "content": "## Read the specified crop table and mapping relationships\n",
+        "height": 272,
+        "width": 672,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2016,
+        336
+      ],
+      "id": "7c016e41-2d2f-4e75-8eb3-8a2d4aa95226",
+      "name": "Sticky Note41"
+    },
+    {
+      "parameters": {
+        "content": "## Save process\n",
+        "height": 220,
+        "width": 396,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        -48
+      ],
+      "id": "38ad168d-0bd2-4d98-9438-322b13bd60c8",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Determine the dimensions",
+        "height": 272,
+        "width": 352,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        336,
+        368
+      ],
+      "id": "6a5b53fb-60d9-489e-bafb-095f165280f0",
+      "name": "Sticky Note42"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=用户输入的是{{ $('When Executed by Another Workflow').last().json.chatInput }}，",
+        "options": {
+          "systemMessage": "你负责引导用户重新输入任务内容，回答用户的输入。根据提示词协助用户正确提问：\n按特性查询\n• 例：\"查询成熟期短、芒长的冬小麦品种\"\n• 例：\"找红粒、株高<80cm的品种\"\n\n按抗性或品质筛选\n• 例：\"抗旱性≥3级且千粒重>40g的品种\"\n• 例：\"粗蛋白含量>13%的春小麦\"\n\n结合地理信息\n• 例：\"原产地为河南省的赤霉病抗性强的品种\"\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        -368,
+        720
+      ],
+      "id": "8910a380-f04b-411f-957b-677956831a52",
+      "name": "Dealing with the ones that slipped through the cracks"
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "={{ $('When Executed by Another Workflow').last().json.varieties }}_cache_results",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        224,
+        432
+      ],
+      "id": "cac85c96-1dd5-4ef2-83dc-41d0dcd818df",
+      "name": "cache",
+      "credentials": {
+        "mySql": {
+          "id": "E2X16jF7wrIlD0d1",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c8ff9946-6f6f-457b-9fd6-ecd4cc17140e",
+              "leftValue": "={{ $json.data }}.",
+              "rightValue": "object",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -224,
+        208
+      ],
+      "id": "b542e93b-a384-4cd2-ad6e-f45b5403b3af",
+      "name": "Security check2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c8ff9946-6f6f-457b-9fd6-ecd4cc17140e",
+              "leftValue": "={{ $json.sqlStatements[0] }}",
+              "rightValue": "SELECT * FROM wheat_data LIMIT 5;",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "1b79de55-913d-4a19-b54d-3d1924caf88d",
+              "leftValue": "={{ $json.sqlStatements[0] }}",
+              "rightValue": "SELECT * FROM wheat_data;",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -560,
+        432
+      ],
+      "id": "1fb44387-32a1-4f53-abfe-4a9ee021f530",
+      "name": "Security check"
+    },
+    {
+      "parameters": {
+        "jsCode": "const sql = $input.first().json.sqlStatements ? $input.first().json.sqlStatements[0] : $input.first().json.sql;\nconst varieties = $('When Executed by Another Workflow').last().json.varieties || '未知作物';\nconst datatable = `${varieties}_data`;\n\n// ==========================================\n// 1️⃣ 核心修复：SQL 语法结构修复函数\n// ==========================================\nfunction fixSqlSyntax(sql) {\n  if (!sql) return \"\";\n\n  // 🚨 修复 1: 补全缺失的 CASE WHEN\n  // 针对错误模式: IFNULL(字段,0) = 0 THEN ... END\n  // 许多 LLM 会在写长公式时漏掉开头的 CASE WHEN\n  sql = sql.replace(\n    /(CASE\\s+WHEN\\s+)?(IFNULL\\s*\\([^)]+\\)\\s*[=<>!]+\\s*\\d+\\s+THEN)/gi,\n    (match, prefix, body) => {\n      // 如果前面已经有 CASE WHEN，则保持原样；否则补上\n      if (prefix && prefix.trim().length > 0) return match;\n      return `CASE WHEN ${body}`;\n    }\n  );\n\n  // 🚨 修复 2: 补全简单的比较逻辑缺失 CASE WHEN\n  // 针对错误模式: + 粗蛋白 >= 15 THEN ... (漏了 CASE WHEN)\n  // 这里的正则识别 \"+ 汉字/字母 >= 数字 THEN\" 这种模式\n  sql = sql.replace(\n    /(\\+\\s*)([\\u4e00-\\u9fa5a-zA-Z0-9_]+\\s*[=<>!]+\\s*[\\d.]+\\s+THEN)/gi,\n    (match, sign, body) => {\n      return `${sign} CASE WHEN ${body}`;\n    }\n  );\n\n  return sql;\n}\n\n// ==========================================\n// 2️⃣ 辅助工具：相似度计算 (保留你原有的逻辑)\n// ==========================================\nfunction levenshtein(a, b) {\n  const m = a.length, n = b.length;\n  const dp = Array.from({ length: n + 1 }, (_, j) => j);\n  for (let i = 1; i <= m; i++) {\n    let prev = i, tmp;\n    for (let j = 1; j <= n; j++) {\n      tmp = dp[j];\n      dp[j] = a[i - 1] === b[j - 1]\n        ? prev\n        : Math.min(dp[j] + 1, dp[j - 1] + 1, prev + 1);\n      prev = tmp;\n    }\n  }\n  return dp[n];\n}\n\nfunction similarity(a, b) {\n  const len = Math.max(a.length, b.length);\n  return len ? 1 - levenshtein(a, b) / len : 1;\n}\n\n// ==========================================\n// 3️⃣ 配置：合法值与别名 (保留你原有的配置)\n// ==========================================\nconst valueMap = {\n  wheat_data: {\n    \"粒色\": [\"红白\", \"白\", \"红\", \"白红\", \"杂\", \"淡红\", \"黄\", \"紫\", \"琥珀\"],\n    \"成熟期\": [\"极早\", \"中\", \"早\", \"晚\", \"极晚\", \"中晚\", \"中早\", \"特早\", \"早中\"],\n    \"冬春性\": [\"春\", \"冬\", \"弱冬\", \"强冬\", \"偏春\", \"半冬\", \"中\", \"强春\"],\n    \"壳色\": [\"白\", \"红\", \"红白\", \"白红\", \"黑\", \"白毛\", \"灰\", \"黄\", \"红毛\", \"红黑\", \"红褐\", \"长黑\", \"褐\", \"花\", \"紫\", \"白底黑壳\", \"白底黑边\", \"红底黑壳\", \"黑壳红底\", \"白底黑\", \"红底黑\", \"浅红\", \"红壳黑边黑\", \"白壳白底黑\", \"鼠灰壳白底\", \"鼠灰壳红底\", \"黑壳红底毛\", \"红壳红底黑\", \"红壳黑边\", \"白壳黑边黑\", \"白壳黑边\", \"鼠灰壳红毛\", \"白底黑边黑\", \"黑壳白底\", \"鼠灰壳白毛\", \"黑壳白底毛\", \"红壳黑边毛\", \"鼠黑\", \"黑白\", \"紫黑\", \"白黑\", \"灰红\", \"黑红\", \"黑毛\", \"黑黄\", \"黑紫\", \"灰毛\", \"鼠灰红底\", \"鼠灰壳白底毛\", \"鼠灰壳红底毛\", \"白壳黑底边\", \"黑褐\"],\n    \"芒\": [\"无\", \"顶\", \"长\", \"短\", \"无长\", \"短曲\", \"微曲\", \"曲\", \"黑长\", \"中\", \"中长\", \"长曲\", \"勾\", \"半芒\", \"半长\", \"短勾\", \"长黑\", \"顶短\", \"黑曲\", \"红长\", \"顶芒\", \"无顶\", \"黑短\", \"无勾\", \"曲芒\", \"勾曲\", \"半无\", \"长半\", \"无半\", \"有\", \"微\", \"拳\", \"黑短曲\", \"黑勾曲\", \"微勾\", \"长拳\", \"微拳\", \"短拳\", \"长勾\", \"黑长曲\", \"黑勾\", \"黑顶\", \"黑毛\", \"顶无\", \"拳曲\", \"长勾曲\", \"墨长\"],\n    \"种类\": [\"国外\", \"中国\"]\n  }\n};\n\nconst aliasMap = {\n  wheat_data: {\n    成熟期: { '早熟': '早', '中熟': '中', '晚熟': '晚', '中早熟': '中早', '特早熟': '特早', '极早熟': '极早', '极晚熟': '极晚', '中晚熟': '中晚', '早中熟': '早中' },\n    种类: { '小麦': '中国' }\n  }\n};\n\n// ==========================================\n// 4️⃣ 字段值清洗逻辑 (优化了删除后的逻辑连接)\n// ==========================================\nfunction fixFieldValues(sql, datatable) {\n  const validValueMap = valueMap[datatable] || {};\n  const aliasMapForTable = aliasMap[datatable] || {};\n  const targetFields = new Set(Object.keys(validValueMap));\n\n  // 替换逻辑：如果找不到合适的值，替换为 \"1=1\" (真值)，而不是空字符串\n  // 这样可以避免 \"WHERE AND\" 或 \"AND AND\" 的语法错误\n  \n  // LIKE '%...%' 处理\n  sql = sql.replace(\n    /(AND\\s+)?([\\u4e00-\\u9fa5]{2,8})\\s+LIKE\\s+['\"]%([^'%\"]+)%['\"](\\s*\\/\\*.*?\\*\\/)?/g,\n    (match, andPrefix, field, value, comment) => {\n      if (!targetFields.has(field)) return match;\n      const legalValues = validValueMap[field];\n      const aliasDict = aliasMapForTable[field] || {};\n      const aliased = aliasDict[value] || value;\n\n      if (legalValues.includes(aliased)) return `${andPrefix || ''}${field} = '${aliased}'${comment || ''}`;\n\n      let best = null, bestScore = 0;\n      for (const candidate of legalValues) {\n        const sc = similarity(aliased, candidate);\n        if (sc > bestScore) { best = candidate; bestScore = sc; }\n      }\n\n      return bestScore >= 0.4\n        ? `${andPrefix || ''}${field} = '${best}'${comment || ''}`\n        : (andPrefix ? 'AND 1=1' : '1=1') + ' /* 兜底清洗:无效值已移除 */';\n    }\n  );\n\n  // IN (...) 处理\n  sql = sql.replace(\n    /(AND\\s+)?([\\u4e00-\\u9fa5]{2,8})\\s+IN\\s*\\(([\\s\\S]*?)\\)(\\s*\\/\\*.*?\\*\\/)?/g,\n    (match, andPrefix, field, valueGroup, comment) => {\n      if (!targetFields.has(field)) return match;\n      const legalValues = validValueMap[field];\n      const aliasDict = aliasMapForTable[field] || {};\n      \n      const values = valueGroup.split(',').map(v => v.replace(/--.*/g, '').trim().replace(/^['\"]|['\"]$/g, '')).filter(v => v.length > 0);\n      const fixedValues = values.map(val => {\n        const aliased = aliasDict[val] || val;\n        if (legalValues.includes(aliased)) return `'${aliased}'`;\n        let best = null, bestScore = 0;\n        for (const candidate of legalValues) {\n          const sc = similarity(aliased, candidate);\n          if (sc > bestScore) { best = candidate; bestScore = sc; }\n        }\n        return bestScore >= 0.4 ? `'${best}'` : null;\n      }).filter(Boolean);\n\n      return fixedValues.length > 0\n        ? `${andPrefix || ''}${field} IN (${fixedValues.join(', ')})${comment || ''}`\n        : (andPrefix ? 'AND 1=1' : '1=1') + ' /* 兜底清洗:无效IN条件已移除 */';\n    }\n  );\n\n  // 等值表达式处理\n  sql = sql.replace(\n    /(AND\\s+)?([\\u4e00-\\u9fa5]{2,8})\\s*=\\s*['\"]([^'\"]+)['\"](\\s*\\/\\*.*?\\*\\/)?/g,\n    (match, andPrefix, field, value, comment) => {\n      if (!targetFields.has(field)) return match;\n      const legalValues = validValueMap[field];\n      const aliasDict = aliasMapForTable[field] || {};\n      const aliased = aliasDict[value] || value;\n\n      if (legalValues.includes(aliased)) return `${andPrefix || ''}${field} = '${aliased}'${comment || ''}`;\n\n      let best = null, bestScore = 0;\n      for (const candidate of legalValues) {\n        const sc = similarity(aliased, candidate);\n        if (sc > bestScore) { best = candidate; bestScore = sc; }\n      }\n\n      return bestScore >= 0.4\n        ? `${andPrefix || ''}${field} = '${best}'${comment || ''}`\n        : (andPrefix ? 'AND 1=1' : '1=1') + ' /* 兜底清洗:无效等值条件已移除 */';\n    }\n  );\n\n  return sql;\n}\n\n// ==========================================\n// 5️⃣ 最终执行流\n// ==========================================\n\n// 第一步：修复 SQL 语法结构 (针对 CASE WHEN 缺失)\nlet processedSQL = fixSqlSyntax(sql);\n\n// 第二步：清洗字段取值\nprocessedSQL = fixFieldValues(processedSQL, datatable);\n\n// 第三步：最后一道防线 - 清理可能产生的 AND 1=1 堆积或 WHERE AND\n// 这一步确保 SQL 看起来不那么乱\nprocessedSQL = processedSQL\n  .replace(/WHERE\\s+AND/gi, 'WHERE') // 修复 WHERE AND\n  .replace(/AND\\s+AND/gi, 'AND');    // 修复 AND AND\n\nreturn {\n  originalSQL: sql,\n  cleanedSQL: processedSQL\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -736,
+        432
+      ],
+      "id": "ee12207c-d561-41ee-946f-7b5d1c851549",
+      "name": "Read and Clean"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputText = $input.first().json.choices[0].message.content;\n\n// SQL 提取正则\nconst sqlRegex = /(?:^|\\s)(?:```)?((?:SELECT\\s.+?\\sFROM)[^;]*)(?:;)?(?:```)?/gis;\n\n// 修复 WHEN 与字段粘连（如 WHEN字段 → WHEN 字段）\nfunction fixWhenSpacing(sql) {\n  return sql.replace(/\\bWHEN([^\\s(=><!]+)/g, 'WHEN $1');\n}\n\n// 修复表达式中嵌套 AS（如 IFNULL(...) AS name + ...）\nfunction fixInnerAs(sql) {\n  return sql.replace(/(\\bIFNULL\\s*\\([^()]+\\))\\s+AS\\s+\\w+\\s*([+\\-),\\n])/g, '$1$2');\n}\n\n// 移除非法括号表达式中嵌套 AS（(expr AS alias) → expr AS alias）\nfunction fixParenAs(sql) {\n  return sql.replace(/\\(\\s*([^()]+?)\\s+AS\\s+(\\w+)\\s*\\)/g, (_, expr, alias) => {\n    return `${expr} AS ${alias}`;\n  });\n}\n\n// 修复 SELECT *, (...) AS alias → SELECT *, expr AS alias\nfunction fixSelectWrapper(sql) {\n  return sql.replace(/SELECT\\s*\\*\\s*,\\s*\\((.+?)\\)\\s+AS\\s+(\\w+)/is, (_, expr, alias) => {\n    return `SELECT *, ${expr} AS ${alias}`;\n  });\n}\n\n// 移除非法元组 (expr1, expr2, expr3)\nfunction fixIllegalTuples(sql) {\n  return sql.replace(/SELECT\\s+\\*,\\s*\\(([^()]+?,[^()]+?)\\)/gi, (_, inner) => {\n    return `SELECT *, ${inner}`;\n  });\n}\n\n// ✅ 根据表名选择字段集\nconst datatable = $('When Executed by Another Workflow').first().json.varieties_data;\n\nconst fieldMap = {\n   wheat_data: [\"作物名称\", \"种质名称\", \"全国统一编号\", \"原全国统一编号\", \"芒\", \"壳色\", \"粒色\", \"冬春\", \"熟性\", \"穗粒数\", \"穗长\", \"株高\", \"千粒重\", \"粗蛋白\", \"赖氨酸\", \"沉淀值\", \"硬度\", \"容重\", \"抗旱性\", \"耐涝性\", \"芽期耐盐\", \"苗期耐盐\", \"田间抗寒性\", \"人工抗寒性\", \"条锈病抗性\", \"叶锈病抗性\", \"秆锈病抗性\", \"白粉反应型\", \"黄矮病抗性\", \"赤霉病抗性\", \"根腐叶病抗性\", \"根腐穗抗性\", \"纹枯病抗性\", \"长管蚜抗性\", \"二叉蚜抗性\", \"备注\", \"共享类型\", \"原产国\", \"原产地\"],\n rice_data: [\n  \"作物名称\", \"原全国统一编号\", \"全国统一编号\", \"种质名称\", \"籼粳亚种\", \"早中晚稻\", \"水陆\",\n  \"粘糯\", \"播种期\", \"抽穗期\", \"成熟期\", \"全生育期\", \"株高\", \"穗长\", \"有效穗数\", \"穗粒数\",\n  \"结实率\", \"千粒重\", \"粒长\", \"粒宽\", \"谷粒长宽比\", \"谷粒形状\", \"剑叶长\", \"剑叶宽\",\n  \"种皮色\", \"颖尖色\", \"颖壳色\", \"共享类型\", \"原产国\", \"原产地\"\n],\n  bus_rice_data: [\n  \"作物名称\", \"全国统一编号\", \"种质名称\", \"籼粳亚种\", \"早中晚稻\", \"粘糯\", \"播种期\", \"全生育期\",\n  \"株高\", \"穗长\", \"有效穗数\", \"穗粒数\", \"结实率\", \"千粒重\", \"粒长\", \"谷粒长宽比\", \"谷粒形状\",\n  \"颖尖色\", \"颖壳色\", \"原产国\", \"原产地\"\n],\n  corn_data: [\n  \"作物名称\", \"全国统一编号\", \"原全国统一编号\", \"种质名称\", \"播种期\", \"出苗期\", \"播种至出苗日数\",\n  \"株高\", \"穗位高\", \"主茎叶片数\", \"抽雄日期\", \"吐丝日期\", \"生育日数\", \"成熟期\", \"穗形\", \"粒型\",\n  \"粒色\", \"轴色\", \"穗长\", \"穗粗\", \"千粒重\", \"粗脂肪\", \"粗蛋白\", \"粗总淀粉\", \"赖氨酸\", \"共享类型\",\n  \"原产国\", \"原产地\"\n],\n millet_data: [\n  \"作物名称\", \"全国统一编号\", \"原全国统一编号\", \"种质名称\", \"抽穗日数\", \"生育期\", \"粳糯性\", \"穗型\",\n  \"粒色\", \"米色\", \"幼苗叶色\", \"幼苗鞘色\", \"刺毛长度\", \"穗松紧\", \"分蘖数\", \"一株茎数\", \"主穗长度\",\n  \"主茎长度\", \"主茎直径\", \"主茎节数\", \"单株秆重\", \"单株穗重\", \"单株粒重\", \"千粒重\", \"粗蛋白\",\n  \"粗脂肪\", \"赖氨占样品\", \"赖氨占蛋白\", \"抗旱性\", \"谷瘟病级别\", \"谷瘟病抗性\", \"蝇被害株率\",\n  \"蝇被害指数\", \"蝇抗性级别\", \"粟芒蝇评价\", \"谷锈严重度\", \"谷锈病级\", \"谷锈反应型\", \"白发病病率\",\n  \"白发病抗性\", \"玉米螟抗性\", \"黑穗病病率\", \"黑穗病病级\", \"黑穗病评价\", \"线虫病指\", \"共享类型\",\n  \"原产国\", \"原产地\"\n],\n  barley_data: [\n\"作物名称\", \"种质名称\", \"种质外文名\", \"全国统一编号\", \"原全国统一编号\", \"科名\", \"属名\", \"种名\", \"学名\",\n\"冬春性\", \"生育周期\", \"当地成熟型\", \"播种期\", \"出苗期\", \"生长习性\", \"株型\", \"抽穗期\", \"成熟期\",\n\"分蘖力\", \"株高(cm)\", \"单株穗数\", \"茎秆直径(mm)\", \"叶耳色\", \"叶色\", \"叶长(cm)\", \"叶宽(cm)\",\n\"芒形\", \"芒性\", \"棱型\", \"穗姿\", \"穗分枝\", \"穗和芒色\", \"穗长(cm)\", \"穗轴茸毛\", \"侧小穗\", \"护颖宽窄\", \"穗密度\", \"稃色\", \"壳色\", \"皮裸性\",\n\"小穗数\", \"穗粒数\", \"粒形\", \"粒色\", \"千粒重(g)\", \"总淀粉\", \"粗蛋白\", \"赖氨酸\", \"品质\", \"主要用途\",\n\"赤霉病抗性\", \"赤霉病穗率\", \"赤霉病指数\",\n\"黄矮严重度\", \"黄矮抗性\", \"黄花发病率\", \"黄花黄化度\", \"黄花叶抗性\",\n\"耐涝级别\", \"耐盐级别\", \"条纹病病率\", \"条纹病抗性\", \"抗旱级别\",\n\"原产地\", \"原产国\", \"来源国\"\n],\n  peanut_data: [\n  \"作物名称\", \"种质名称\", \"原全国统一编号\", \"全国统一编号\", \"植物学类型\", \"种皮颜色\", \"每荚粒数\",\n  \"主茎高\", \"第一侧枝长\", \"总枝数\", \"单株饱果数\", \"单株果重\", \"百果重\", \"百仁重\", \"百果仁重\",\n  \"出仁率\", \"含油量\", \"蛋白质含量\", \"油酸C18:1\", \"亚油酸C18:2\", \"棕榈酸C16:0\", \"硬脂酸C18:0\",\n  \"花生酸C20:0\", \"花生烯酸C20:1\", \"山嵛酸C22:0\", \"共享类型\", \"原产国\", \"原产地\"\n],\n  sorghum_data: [\n  \"作物名称\", \"全国统一编号\", \"原统一编号\", \"种质名称\", \"芽鞘色\", \"幼苗色\", \"株高\", \"茎粗\",\n  \"主脉色\", \"穗型\", \"穗形\", \"穗长\", \"穗柄长\", \"颖壳包皮度\", \"壳色\", \"粒色\", \"穗粒重\", \"千粒重\",\n  \"生育日数\", \"分蘖性\", \"倒伏性\", \"着壳率\", \"角质率\", \"锤度\", \"粗蛋白\", \"赖氨占样品\", \"赖氨占蛋白\",\n  \"单宁\", \"水份\", \"总淀粉\", \"直链淀粉\", \"支链淀粉\", \"耐旱性\", \"芽期耐盐性\", \"苗期耐盐性\", \"耐瘠性\",\n  \"苗期耐冷性\", \"灌浆耐冷性\", \"丝黑病率2\", \"丝黑抗级2\", \"丝黑评价2\", \"丝黑抗级3\", \"丝黑评价3\",\n  \"高粱蚜抗级\", \"高粱蚜评价\", \"玉米螟抗级\", \"玉米螟评价\", \"靶斑病抗级\", \"靶斑病评价\", \"共享类型\",\n  \"原产国\", \"原产地\"\n],\n  castor_data: [\n  \"库编号\", \"统一编号\", \"保存单位\", \"单位编号\", \"品种名称\", \"译名\",\n  \"科名\", \"属名\", \"学名\", \"产地或来源\", \"选育方法\", \"成熟期\", \"生育期\",\n  \"主茎色\", \"株高\", \"蒴果有无刺\", \"穗形\", \"有效分枝数\", \"有效穗数\",\n  \"果穗长度\", \"裂蒴性\", \"百粒重\", \"种子形状\", \"种皮颜色\", \"出仁率\",\n  \"子实含油率\", \"子仁含油率\", \"备注\", \"省\"\n],\n  oats_data: [\n  \"作物名称\", \"全国统一编号\", \"原全国统一编号\", \"种质名称\", \"幼苗习性\", \"幼苗颜色\", \"籽粒类型\",\n  \"穗型\", \"小穗型\", \"株高\", \"穗长\", \"单株粒重\", \"主穗粒重\", \"千粒重\", \"有效分蘖\", \"轮层数\",\n  \"生育期\", \"共享类型\", \"原产国\", \"原产地\"\n],\n  buckwheat_data: [\n  \"作物名称\", \"学名\", \"种质名称\", \"全国统一编号\", \"原全国统一编号\", \"株型\", \"茎色\", \"叶\",\n  \"花色\", \"籽粒颜\", \"籽粒形状\", \"腹沟\", \"棱翅\", \"株高\", \"主茎节数\", \"主茎分枝数\", \"生育日数\",\n  \"落粒性\", \"倒伏性\", \"单株粒重\", \"千粒重\", \"共享类型\", \"原产国\", \"原产地\"\n],\n  rapeseed_data: [\n  \"作物名称\", \"全国统一编号\", \"原全国统一编号\", \"种质名称\", \"生育日数\", \"成熟期\", \"叶型\", \"花色\",\n  \"种皮色\", \"株高\", \"分枝高度\", \"全株角果数\", \"一次分枝数\", \"每果粒数\", \"千粒重\", \"菌核病抗性\",\n  \"病毒病抗性\", \"霜霉病抗性\", \"含油率\", \"硫甙含量\", \"棕榈酸含量\", \"硬脂酸含量\", \"油酸含量\",\n  \"亚油酸含量\", \"亚麻酸含量\", \"花生烯酸含量\", \"芥酸含量\", \"共享类型\", \"原产国\", \"原产地\"\n],\n  proso_data: [\n  \"作物名称\", \"种质名称\", \"全国统一编号\", \"原全国统一编号\", \"株高\", \"主穗长\", \"主茎节数\",\n  \"花序色\", \"穗型\", \"粒色\", \"米色\", \"单株粒重\", \"千粒重\", \"生育日数\", \"落粒性\", \"倒伏性\",\n  \"黑穗病\", \"苗期耐盐\", \"芽期耐盐\", \"耐盐性\", \"粗蛋白\", \"粗脂肪\", \"赖氨酸\", \"粳糯性\",\n  \"共享类型\", \"原产国\", \"原产地\"\n],\n  soybean_data: [\n  \"作物名称\", \"原全国统一编号\", \"全国统一编号\", \"种质名称\", \"类型\", \"生育/份\", \"生育日数\",\n  \"粒色\", \"子叶色\", \"脐色\", \"百粒重\", \"粒形\", \"生长习性\", \"结荚习性\", \"茸毛色\", \"花色\",\n  \"株高\", \"叶形\", \"粗蛋白\", \"粗脂肪\", \"共享类型\", \"原产国\", \"原产地\"\n]\n};\n\nconst correctFields = fieldMap[datatable] || [];\n\n// 相似度比较函数\nfunction levenshtein(a, b) {\n  const m = a.length, n = b.length;\n  const dp = Array.from({ length: n + 1 }, (_, j) => j);\n  for (let i = 1; i <= m; i++) {\n    let prev = i, tmp;\n    for (let j = 1; j <= n; j++) {\n      tmp = dp[j];\n      dp[j] = a[i - 1] === b[j - 1] ? prev : Math.min(dp[j] + 1, dp[j - 1] + 1, prev + 1);\n      prev = tmp;\n    }\n  }\n  return dp[n];\n}\n\nfunction similarity(a, b) {\n  const len = Math.max(a.length, b.length);\n  return len ? 1 - levenshtein(a, b) / len : 1;\n}\n// 注释区域屏蔽\nfunction wrapComments(sql) {\n  const commentMap = new Map();\n  let counter = 0;\n  sql = sql.replace(/--.*$/gm, (m) => {\n    const key = `__COMMENT_${counter++}__`;\n    commentMap.set(key, m);\n    return key;\n  });\n  return { sql, commentMap };\n}\n\n// 注释区域还原\nfunction unwrapComments(sql, commentMap) {\n  for (const [key, value] of commentMap.entries()) {\n    sql = sql.replace(key, value);\n  }\n  return sql;\n}\n\n// 字段名修复函数\nfunction fixFieldNames(sql) {\n  const aliasSet = new Set();\n  sql.replace(/\\bAS\\s+([\\u4e00-\\u9fa5]{2,8})/g, (_, alias) => aliasSet.add(alias));\n\n  return sql.replace(/([^\\w])([\\u4e00-\\u9fa5]{2,8}?)(?=[\\s=<>),;])/g, (m, pre, fld) => {\n    if (aliasSet.has(fld) || correctFields.includes(fld)) return m;\n\n    let best = fld;\n    let bestScore = 0;\n\n    for (const cf of correctFields) {\n      // 避免将长字段替换为短字段（如：杆锈反应型 → 芒）\n      if (Math.abs(cf.length - fld.length) > 2) continue;\n\n      const sc = similarity(fld, cf);\n\n      // 加强对“反应型”等关键词字段的匹配\n      const keywordBoost = (fld.endsWith('反应型') && cf.endsWith('反应型')) ? 0.2 : 0;\n\n      const totalScore = sc + keywordBoost;\n      if (totalScore > bestScore && totalScore > 0.6) {\n        bestScore = totalScore;\n        best = cf;\n      }\n    }\n\n    return `${pre}${best}`;\n  });\n}\n\n\n// 清洗主函数\nfunction cleanSQL(sql) {\n  sql = sql.replace(/```/g, '');\n  sql = fixWhenSpacing(sql);\n  sql = fixInnerAs(sql);\n  sql = fixParenAs(sql);\n  sql = fixSelectWrapper(sql);\n  sql = fixIllegalTuples(sql);\n\n  // 💡 处理注释屏蔽和字段名修复\n  const { sql: sqlNoComment, commentMap } = wrapComments(sql);\n  let fixed = fixFieldNames(sqlNoComment);\n  fixed = unwrapComments(fixed, commentMap);\n\n  return fixed.trim();\n}\n\n\n// 提取 SQL 并清洗\nfunction extractAndFixSQL(text) {\n  const matches = [];\n  let match;\n  while ((match = sqlRegex.exec(text)) !== null) {\n    let sql = match[1].trim();\n    if (!sql.endsWith(';')) sql += ';';\n    matches.push(cleanSQL(sql));\n  }\n  return matches;\n}\n\nconst cleaned = extractAndFixSQL(inputText);\n\nreturn cleaned.length > 0\n  ? { valid: true, sqlStatements: cleaned, message: `✅ SQL语句清洗完成，共修复 ${cleaned.length} 条。` }\n  : { valid: false, message: '❌ 未提取到 SQL 语句，请检查格式。' };\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -896,
+        432
+      ],
+      "id": "254ef494-8290-4224-a7d2-53117ca9d887",
+      "name": "Refine and validate SQL statements"
+    },
+    {
+      "parameters": {
+        "jsCode": "const answer = $input.first().json.choices[0].message.content;\n\n// ✅ 1. 新增：获取外层工作流传进来的 chatInput\nconst chatInput = $('When Executed by Another Workflow').last().json.chatInput;\n\n// 替换所有单引号为 \\' 防止 SQL 插入失败\nconst escapeSql = (text) => {\n  if (typeof text !== 'string') return text;\n  return text.replace(/'/g, \"\\\\'\");\n};\n\n// 清洗 SQL：修复常见拼接错误\nconst cleanSql = (sqlText) => {\n  if (typeof sqlText !== 'string') return sqlText;\n  return sqlText\n    .replace(/ASCLIMIT/gi, 'ASC LIMIT')  // 修复常见拼接错误\n    .replace(/;\\s*$/, '')                // 去除末尾分号\n    .trim();\n};\n\n// 从 sql 节点中取出 SQL 原文\nconst rawSql = $('sql').first().json.sql;\n\nreturn {\n  json: {\n    answer: escapeSql(answer),\n    sql: escapeSql(cleanSql(rawSql)),      // ✅ 清洗 + 转义后输出\n    safe_question: escapeSql(chatInput)    // ✅ 2. 新增：输出转义后的提问内容\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2064,
+        448
+      ],
+      "id": "23f3bc18-2d7a-4b9d-abca-6b5340b32b3b",
+      "name": "Escape the / in answer"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.122.14.169:30002/v1/chat/completions",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"Qwen3.5-397B-A17B\",\n  \"temperature\": 0.7,\n  \"top_p\": 0.8,\n  \"top_k\": 20,\n  \"min_p\": 0.0,\n  \"presence_penalty\": 1.5,\n  \"repetition_penalty\": 1.0,\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": {{ JSON.stringify($json.system_prompt) }}\n    },\n    {\n      \"role\": \"user\",\n      \"content\": {{ JSON.stringify($json.user_prompt) }}\n    }\n  ]\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1840,
+        448
+      ],
+      "id": "9ee224a0-ac11-4670-befc-0581c3a2ec95",
+      "name": "Summary of Recommended Resources"
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "chatInput": "hi,it's me,Find some soybean varieties suitable for making tofu.\n",
+          "sessionId": "testuser-001-1780899563188",
+          "varieties": "soybean",
+          "mining": "score_query",
+          "database": "soybean_data",
+          "keywords": [
+            "粗蛋白",
+            "百粒重",
+            "子叶色",
+            "粒色"
+          ],
+          "commercialMode": "false",
+          "userType": "B",
+          "context_query": "【用户类型】：B用户\n【功能模式】：专家模式=false，稳定模式=true，商业品种=false，国际数据=false\n\n以下是用户与助手之前的对话历史，供上下文参考：\n用户：找一些适合豆腐制作的大豆品种。\n助手：经过多轮赋分查询查询后，系统为您筛选出如下资源：这些品种在蛋白质含量、籽粒大小及加工适应性上表现卓越，均具备高蛋白（≥46%）、大粒重（≥21g）及理想的脂肪含量区间，是制作高品质豆腐的理想原料。\n\n推荐品种包括：吴江迟晚豆 1(DDAZ004579)、如皋荚三 (DDAZ004657)、溧阳打油黄豆甲 (DDAZ004531)、铜山兔子眼 (DDAZ003928)、沙洲大粒豌甲 (DDAZ004554)、铜山黄大豆乙 (DDAZ003923)、无锡九月枯 2(DDAZ004568)、南通白毛尖甲 (DDAZ004663) 等。\n\n针对豆腐制作的核心需求，前五名推荐品种优势显著：**吴江迟晚豆 1**以极高的粗蛋白含量 47.00% 和超大的百粒重 28.80 g 位居榜首，能显著提升豆腐得率与口感细腻度；**如皋荚三**不仅粗蛋白高达 46.60%，且株高仅 40.90 cm，极矮的株型配合直立生长习性，抗倒伏能力强，利于机械化收获以降低生产成本；**溧阳打油黄豆甲**拥有本次筛选中最高的粗蛋白含量 47.80%，其黄子叶与黄色种皮确保了成品豆腐色泽洁白诱人；**铜山兔子眼**在保持 46.80% 高蛋白的同时，生育日数仅 106 d，属于早熟品种，能有效规避后期低温风险，适合茬口紧张的地区种植；**沙洲大粒豌甲**则完美平衡了营养与形态，粗蛋白 46.90% 搭配 21.60 g 的百粒重，且粗脂肪控制在 17.70% 的最佳加工区间，避免油脂过高影响凝固效果。所有推荐品种均采用“直立”生长习性与“有限”结荚习性，成熟期集中，田间整齐度高，非常适合规模化种植与统一收获。\n\n本次筛选逻辑基于豆腐加工特性，优先锁定粗蛋白含量高于 38% 的种质，并综合考量百粒重（越大得率越高）、粗脂肪（适中利于凝固）、子叶色与粒色（黄色系保证成品白度）以及农艺性状（直立与有限结荚利于机械化），最终按综合适配度排序得出。\n\n用户：找一些适合豆腐制作的大豆品种。\n助手：经过多轮赋分查询查询后，系统为您筛选出如下资源：这些品种在粗蛋白含量、百粒重及低脂肪特性上表现卓越，且均为黄子叶、直立生长习性，是制作高品质豆腐的理想原料，能显著提升出浆率与成品口感。\n\n推荐品种包括：高力黄 (DDAZ001165)、黄豆 (DDAZ008405)、白毛豆 (DDAZ006088)、白毛豆 (DDAZ006075)、大个黄豆 (DDAZ011909)、大土黄 (DDAZ001177)、刺鸡子黄豆 (DDAZ011729)、吴江迟熟种 2 (DDAZ004577) 等。\n\n针对豆腐加工需求，系统优先锁定了粗蛋白含量高于 40% 且共享类型为 B 类的种质，并依据“高蛋白、大粒重、低脂肪”的核心逻辑进行排序。**高力黄**以 48.10% 的超高粗蛋白含量和 22.80 g 的百粒重位居榜首，配合 15.70% 的低粗脂肪，能最大化豆腐得率并保证质地细腻；**黄豆**与**大个黄豆**则展现了极佳的粒重优势，百粒重分别达到 25.30 g，且粗蛋白均接近 48.00%，非常适合规模化高产加工；来自浙江的**白毛豆**（DDAZ006088）和湖北的**刺鸡子黄豆**在保持 47.00% 左右高蛋白的同时，粗脂肪控制在 15.10%-16.90% 的优异区间，有助于改善豆腐凝固效果；所有推荐品种均采用“直立”生长习性和“有限”结荚习性，不仅利于机械化收获降低生产成本，且统一具备“黄子叶”和“黄粒色”特征，确保加工后的豆制品色泽金黄、卖相极佳。\n\n用户：找一些适合豆腐制作的大豆品种。\n助手：经过多轮赋分查询查询后，系统为您筛选出如下资源：这些品种在粗蛋白含量、百粒重及低脂特性上表现卓越，且均为黄子叶、黄粒色的直立有限结荚类型，是制作高品质豆腐的理想原料，能显著提升豆腐得率与色泽洁白度。\n\n推荐品种包括：大土黄 (DDAZ001177)、白毛豆 (DDAZ006075)、白黄豆 (DDAZ010633)、刺鸡子黄豆 (DDAZ011729)、高力黄 (DDAZ001165)、吴江迟熟种 2 (DDAZ004577)、白毛豆 (DDAZ006088)、黄豆 (DDAZ008405) 等。\n\n具体优势分析如下：\n首先，**大土黄**与**高力黄**展现了极高的蛋白储备，粗蛋白含量分别高达 46.10% 和 48.10%，配合 22.70 g 和 22.80 g 的饱满百粒重，能确保豆腐成品口感细腻且产出率高；其中高力黄的粗脂肪低至 15.70%，进一步减少了豆腥味，提升了风味纯净度。\n其次，**白毛豆**（浙江德清来源）与**刺鸡子黄豆**在保持高蛋白（分别为 47.70% 和 47.30%）的同时，具备优异的株高控制（约 75 cm 和 55 cm），这种紧凑的直立株型不仅抗倒伏能力强，更利于田间管理与机械化收获，降低了种植风险。\n再者，**吴江迟熟种 2**、**白毛豆**（浙江余杭来源）及**黄豆**（河北深泽来源）拥有突出的大粒特性，百粒重分别达到 24.90 g、25.20 g 和 25.30 g，大粒品种在浸泡和磨浆过程中吸水更均匀，能有效提升豆腐的保水性与嫩滑度，且三者粗脂肪均控制在 16.70% 以下，完美契合豆腐加工对“高蛋白、低脂肪”的严苛要求。\n最后，所有推荐品种均具备“黄子叶、黄粒色”的优质外观特征，这将直接赋予豆腐诱人的天然淡黄色泽，避免深色种皮带来的色泽污染，同时“有限结荚”习性保证了成熟期一致，便于集中采收以获取品质均一的原料。\n\n**查询逻辑说明**：\n系统基于豆腐加工对“高蛋白、大粒、低脂及黄子叶”的核心需求构建了筛选模型，优先锁定粗蛋白≥38% 且子叶为黄色或青黄色的 B 类共享资源；随后通过多维加权排序，将粗蛋白含量越高、百粒重越大、粗脂肪越低以及生长习性越直立的品种排在前列，从而精准匹配您的育种或生产目标。\n\n用户：找一些适合豆腐制作的大豆品种。\n助手：经过多轮赋分查询查询后，系统为您筛选出如下资源：这些品种在粗蛋白含量、百粒重及低脂特性上表现卓越，且均为黄子叶、黄粒色的直立有限结荚类型，是制作高品质豆腐的理想原料，能显著提升出浆率并保证成品色泽洁白、口感细腻。\n\n推荐品种包括：高力黄 (DDAZ001165)、黄豆 (DDAZ008405)、铜山黄大豆乙 (DDAZ003923)、溧阳打油黄豆甲 (DDAZ004531)、吴江迟晚豆 1 (DDAZ004579)、吴江迟熟种 2 (DDAZ004577)、铜山兔子眼 (DDAZ003928)、大土黄 (DDAZ001177) 等。其中，**高力黄**以 48.10% 的超高粗蛋白含量和 22.80 g 的大粒重脱颖而出，配合 15.70% 的低脂肪，极利于豆腐凝固与得率；**黄豆**不仅蛋白高达 48.00%，更拥有 25.30 g 的超大百粒重，出浆潜力巨大；**铜山黄大豆乙**与**溧阳打油黄豆甲**分别以 46.40% 和 47.80% 的蛋白含量，兼顾了 23.30 g 和 23.20 g 的优良粒重，且脂肪控制在 17.90% 和 17.10% 的理想区间；**吴江迟晚豆 1**则以 28.80 g 的特大粒重著称，虽生育期稍长，但单产效益与加工品质极佳。本次筛选严格遵循“高蛋白（≥40%）、大粒重、低脂肪”的豆腐加工核心标准，并优先匹配了生长习性为直立、结荚习性为有限的农艺性状，确保品种既适合机械化收获，又能提供均一稳定的原料品质。\n\n当前用户的新问题是：\n用户：hi,it's me,Find some soybean varieties suitable for making tofu.\n （用户未上传CSV基因型文件）\n\n请结合上述信息，准确、简洁地回答当前问题。"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "转换成字符串格式": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MySQL3": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields8": {
+      "main": [
+        [
+          {
+            "node": "MySQL6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MySQL6": {
+      "main": [
+        []
+      ]
+    },
+    "Respond to Webhook7": {
+      "main": [
+        []
+      ]
+    },
+    "sql": {
+      "main": [
+        [
+          {
+            "node": "Security check2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields7": {
+      "main": [
+        []
+      ]
+    },
+    "Edit Fields10": {
+      "main": [
+        [
+          {
+            "node": "MySQL8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MySQL8": {
+      "main": [
+        []
+      ]
+    },
+    "Extract from File4": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "table_structure": {
+      "main": [
+        [
+          {
+            "node": "Extract from File2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "prompt": {
+      "main": [
+        [
+          {
+            "node": "Extract from File4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk3": {
+      "main": [
+        [
+          {
+            "node": "Extract from File5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File5": {
+      "main": [
+        [
+          {
+            "node": "graphConfig",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File2": {
+      "main": [
+        [
+          {
+            "node": "prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Batch storage and query_hash": {
+      "main": [
+        [
+          {
+            "node": "cache",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Score Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code6": {
+      "main": [
+        [
+          {
+            "node": "Summary of Recommended Resources",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "table_structure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "graphConfig": {
+      "main": [
+        [
+          {
+            "node": "graphConfig1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "graphConfig1": {
+      "main": [
+        [
+          {
+            "node": "Code6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk7": {
+      "main": [
+        [
+          {
+            "node": "Extract from File7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File7": {
+      "main": [
+        [
+          {
+            "node": "转换成字符串格式",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score Query": {
+      "main": [
+        [
+          {
+            "node": "Refine and validate SQL statements",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dealing with the ones that slipped through the cracks": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields10",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cache": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Security check2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields8",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Batch storage and query_hash",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Security check": {
+      "main": [
+        [
+          {
+            "node": "sql",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Dealing with the ones that slipped through the cracks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read and Clean": {
+      "main": [
+        [
+          {
+            "node": "Security check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Refine and validate SQL statements": {
+      "main": [
+        [
+          {
+            "node": "Read and Clean",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Escape the / in answer": {
+      "main": [
+        [
+          {
+            "node": "MySQL3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summary of Recommended Resources": {
+      "main": [
+        [
+          {
+            "node": "Escape the / in answer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2b68157f-e28e-4f3a-98c8-d49815176839",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ded950d5074d489a0dced71f1bb759c1111e5b940d0041a4c0632beee754395b"
+  },
+  "id": "9KTda5Sreap6aJYb",
+  "tags": []
+}
