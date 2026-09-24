@@ -1,0 +1,15 @@
+.deps/
+.venv/
+__pycache__/
+*.pyc
+config.json
+*.local.json
+.test-config.json
+.env
+outputs/
+build/
+dist/
+*.egg-info/
+inputs/
+deliveries/
+validation_report*.json

@@ -21,6 +21,13 @@ CropMaestro 是一个面向作物种质资源的智能检索框架。本仓库�
 | `cgr_bench/` | CGR-Bench 金标数据集（150 题，五种作物；注意与开源数据口径不同） |
 | `backend/` | 状态同步与 GS 预测服务 |
 | `docs/` | 架构与部署 |
+| [`tools/data_importer/`](tools/data_importer/) | 可复用数据接入工具：CSV/TSV/XLSX 画像、来源专属提示词及非覆盖 MySQL 导入；附英文说明与合成示例 |
+
+## 数据接入工具 / Data-import tool
+
+[`tools/data_importer/`](tools/data_importer/) 提供可复用的数据接入工具及安装、配置和测试说明。工具接收已获取的表格数据，生成作物/数据源专属的接入包，并支持将数据发布到已配置的 MySQL。它不自动获取外部平台数据、不修改现有 n8n 工作流，也不执行跨来源数据协调或自动同步。来源语义和工作流连接仍需配置。该目录只提供源码、测试和合成示例，不包含实际种质记录或部署凭据。
+
+The reusable [data-import tool](tools/data_importer/) includes source code, tests, and an English usage guide. It prepares source-specific retrieval packages from tabular datasets and supports non-overwriting publication to a configured MySQL deployment. The included example is synthetic; no additional germplasm records or deployment credentials are distributed with the tool.
 
 ## 引用
 

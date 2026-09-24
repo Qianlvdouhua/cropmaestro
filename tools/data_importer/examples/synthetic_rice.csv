@@ -1,0 +1,5 @@
+accession_id,plant_height_cm,grain_color
+DEMO001,80,white
+DEMO002,95,brown
+DEMO003,110,white
+DEMO004,,brown

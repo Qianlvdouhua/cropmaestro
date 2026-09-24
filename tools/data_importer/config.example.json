@@ -1,0 +1,27 @@
+{
+  "mysql": {
+    "host": "127.0.0.1",
+    "port": 3306,
+    "user": "",
+    "database": "",
+    "password_env": "CM_MYSQL_PASSWORD",
+    "trusted_private_network": false
+  },
+  "template_cache_table": "corn_cache_results",
+  "cache_contract": {
+    "query_task_type": "VARCHAR(64)",
+    "time_column": "create_at",
+    "session_id_length": 64,
+    "confirmed": false
+  },
+  "llm": {
+    "enabled": false,
+    "base_url": "",
+    "model": "",
+    "temperature": 0,
+    "max_tokens": 4096,
+    "timeout": 120,
+    "json_mode": true
+  },
+  "output_root": "outputs"
+}
