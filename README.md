@@ -35,4 +35,6 @@ The reusable [data-import tool](tools/data_importer/) includes source code, test
 
 ## 许可
 
+数据导入工具 [`tools/data_importer/`](tools/data_importer/)（含该目录内的说明、测试和合成示例）采用 [MIT License](tools/data_importer/LICENSE)，版权所有 © 2026 Bintao Pan。此许可证不适用于仓库其他目录，不授予外部种质数据或其他第三方数据的使用权；第三方依赖遵循其各自许可证。
+
 发布前请确认商业品种数据与 prompt 的对外发布范围，并自行选择 `LICENSE`。

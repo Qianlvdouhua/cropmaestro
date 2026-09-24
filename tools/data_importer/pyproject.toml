@@ -7,6 +7,7 @@ name = "cropmaestro-importer"
 version = "0.3.0"
 description = "Source-aware prompt preparation and non-overwriting MySQL import for CropMaestro"
 requires-python = ">=3.11"
+license = {file = "LICENSE"}
 dependencies = ["PyMySQL>=1.1,<2", "cryptography>=42", "openpyxl>=3.1,<4"]
 
 [project.scripts]

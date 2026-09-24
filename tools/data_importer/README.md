@@ -2,6 +2,10 @@
 
 Version 0.3.0. This tool prepares crop- and source-specific retrieval packages from CSV, TSV, or XLSX data and supports non-overwriting publication to an existing MySQL deployment. It is the data-import component used when adapting CropMaestro to additional datasets.
 
+## License
+
+Copyright (c) 2026 Bintao Pan. The source code, documentation, tests, and synthetic example in this directory are licensed under the [MIT License](LICENSE). This directory-level license does not apply to other parts of the repository and does not grant rights to external germplasm datasets or other third-party data. Third-party dependencies retain their respective licenses.
+
 The tool does **not** download data from external PGR systems, grant access to restricted records, harmonize measurements across sources, or provide automatic synchronization. Obtain the data and permission to use them before importing them. Source-specific semantic information and runtime workflow connections still require configuration.
 
 Only source code, tests, a blank configuration template, and a four-record **synthetic** example are provided here. The example values are not germplasm observations or agronomic recommendations. Production configuration, real data, credentials, and historical deployment reports are excluded.
