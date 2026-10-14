@@ -1,6 +1,7 @@
 # CropMaestro
 
 CropMaestro 是一个面向作物种质资源的智能检索框架。本仓库提供脱敏 n8n 工作流、**商业水稻（`bus_rice`）** 四层提示词、MySQL 表结构及商业品种数据导入脚本；另附评测金标 **[CGR-Bench](cgr_bench/)**（仅题目与标注，**不含**五种作物种质库数据，**不能**在本仓库内直接跑满 150 题，见该目录说明）。
+<img width="2386" height="1269" alt="Figure1" src="https://github.com/user-attachments/assets/fcb4d310-4a49-4b2f-9061-d5c7597201a5" />
 
 ## 快速开始
 
