@@ -1,67 +1,67 @@
 # CropMaestro
-CropMaestro 是一个面向作物种质资源的多智能体智能检索框架，帮助农业科研人员和育种工作者通过自然语言描述需求，从种质资源数据中寻找符合要求的候选材料。
+CropMaestro is a multi-agent intelligent retrieval framework designed for crop germplasm resources. It helps agricultural researchers and breeders identify candidate materials that meet their requirements from germplasm data by describing their needs using natural language.
 
-传统表单式检索通常要求用户熟悉性状名称、评价尺度和筛选阈值。CropMaestro 将需求理解、性状字段映射、数据库查询和结果解释组织为协同工作流，支持多性状、多约束的种质资源数据检索，以及相关专业知识问答。
+Traditional form-based retrieval typically requires users to be familiar with trait names, evaluation scales, and screening thresholds. CropMaestro organizes requirement understanding, trait-field mapping, database queries, and result interpretation into a collaborative workflow, supporting multi-trait, multi-constraint searches of germplasm data as well as Q&A regarding relevant domain expertise.
 
-## 框架概览
+## Framework Overview
 
-CropMaestro 采用四层多智能体架构：
+CropMaestro employs a four-layer multi-agent architecture:
 
-- **控制层**：识别用户意图，判断任务类型，并引导用户澄清需求。
-- **分析层**：定位目标作物，将用户需求映射到对应的数据字段和检索条件。
-- **执行层**：生成并执行数据库查询，结合检索策略筛选候选种质记录。
-- **解释层**：汇总检索结果，提供性状解释、推荐依据和可视化展示。
+- **Control Layer**: Identifies user intent, determines task type, and guides users to clarify their requirements.
+- **Analysis Layer**: Identifies the target crop and maps user requirements to corresponding data fields and search criteria.
+- **Execution Layer**: Generates and executes database queries, filtering candidate germplasm records based on search strategies.
+- **Interpretation Layer**: Summarizes search results, providing trait interpretations, rationale for recommendations, and visualizations.
   
 <img width="2386" height="1269" alt="Figure1" src="https://github.com/user-attachments/assets/fcb4d310-4a49-4b2f-9061-d5c7597201a5" />
 
-框架通过加载数据源和作物对应的字段定义、计量单位、类别含义及相关知识，适配不同的检索任务。不同数据源可以复用同一套核心工作流，但每次查询在所选数据源内执行，不将不同来源的记录合并用于联合筛选或排序。
+The framework adapts to different search tasks by loading data sources along with the corresponding field definitions, units of measurement, category definitions, and related knowledge for each crop. Different data sources can reuse the same core workflow, but each query is executed within the selected data source; records from different sources are not merged for combined filtering or sorting.
 
-CropMaestro 集成两种检索策略：
+CropMaestro integrates two search strategies:
 
-- **知识增强检索**：检索与任务相关的作物标准、性状解释和数据源特定知识，辅助将自然语言需求转换为适当的字段与筛选条件。
-- **并发对抗检索**：由多个检索智能体并行生成、执行候选查询，再通过评审智能体比较其与用户需求的匹配程度，选择最终结果。
+- **Knowledge-Enhanced Search**: Retrieves task-relevant crop standards, trait explanations, and data source-specific knowledge to assist in converting natural language queries into appropriate fields and filter criteria.
+- **Concurrent Adversarial Search**: Multiple search agents generate and execute candidate queries in parallel; an evaluation agent then compares their alignment with the user’s query to select the final result.
 
  <img width="2487" height="1319" alt="Figure3" src="https://github.com/user-attachments/assets/59ddfad3-876a-4f9f-a4ca-8c765e849e0c" />
 
-## 评测基准与仓库内容
-我们构建了作物种质资源检索评测基准 **[CGR-Bench](cgr_bench/)**，包含五种主要作物的 150 道查询，覆盖三个难度等级，用于评估字段选择、检索条件及返回种质记录的质量。
+## Evaluation Benchmark and Repository Contents
+We have developed the Crop Germplasm Resource Retrieval Evaluation Benchmark **[CGR-Bench](cgr_bench/)**, which includes 150 queries across five major crop types and covers three difficulty levels. It is designed to evaluate the quality of field selection, retrieval criteria, and returned germplasm records.
 
-本仓库提供脱敏 n8n 工作流、**商业水稻（`bus_rice`）** 四层提示词、MySQL 表结构、商业品种数据导入脚本，以及可复用的数据接入工具。
+This repository provides an anonymized n8n workflow, **commercial rice (`bus_rice`)** four-level prompts, MySQL table structures, scripts for importing commercial variety data, and reusable data integration tools.
 
-CGR-Bench 目录提供查询题目与参考标注，**不包含五种作物的种质库数据**。因此，仓库中的商业水稻部署示例不能直接用于完成全部 150 道基准查询，具体使用条件见该目录说明。
+The CGR-Bench directory provides query examples and reference annotations, but **does not include germplasm repository data for the five crop types**. Therefore, the commercial rice deployment example in the repository cannot be used directly to complete all 150 benchmark queries; see the directory description for specific usage conditions.
 
-## 快速开始
+## Quick Start
 
-1. 执行 [schema/ddl](schema/ddl) 并导入 [data/bus_rice_data.sql](data/bus_rice_data.sql)
-2. 启动 [backend/](backend/)（状态 API 5000；可选 GS API 8000）
-3. 按 [docs/setup.md](docs/setup.md) 将 `prompts/bus_rice/` 挂载到 n8n `/data`
-4. 导入 [workflow/CropMaestro.workflow.json](workflow/CropMaestro.workflow.json)，绑定 MySQL / LLM 凭证
-5. 调用 Webhook 时设置 `"commercialMode": true`（水稻商业库分支）
+1. Run [schema/ddl](schema/ddl) and import [data/bus_rice_data.sql](data/bus_rice_data.sql)
+2. Start [backend/](backend/) (Status API 5000; optional GS API 8000)
+3. Follow [docs/setup.md](docs/setup.md) to mount `prompts/bus_rice/` to n8n `/data`
+4. Import [workflow/CropMaestro.workflow.json](workflow/CropMaestro.workflow.json) and bind MySQL / LLM credentials
+5. Set `“commercialMode”: true` when calling the webhook (commercial rice repository branch)
 
-## 目录概览
+## Directory Overview
 
-| 目录 | 说明 |
+| Directory | Description |
 |------|------|
 | `workflow/` | n8n JSON |
-| `prompts/bus_rice/` | 商业水稻四层提示词 |
+| `prompts/bus_rice/` | Four-layer prompts for commercial rice |
 | `schema/` | DDL + `schema_bus_rice_demo.txt` |
-| `data/` | `bus_rice_data.sql` 商业品种数据 |
-| `cgr_bench/` | CGR-Bench 金标数据集（150 题，五种作物；注意与开源数据口径不同） |
-| `backend/` | 状态同步与 GS 预测服务 |
-| `docs/` | 架构与部署 |
-| [`tools/data_importer/`](tools/data_importer/) | 可复用数据接入工具：CSV/TSV/XLSX 画像、来源专属提示词及非覆盖 MySQL 导入；附英文说明与合成示例 |
+| `data/` | `bus_rice_data.sql` commercial variety data |
+| `cgr_bench/` | CGR-Bench Gold Standard Dataset (150 questions, five crops; note that the scope differs from open-source data) |
+| `backend/` | State Synchronization and GS Prediction Service |
+| `docs/` | Architecture and Deployment |
+| [`tools/data_importer/`](tools/data_importer/) | Reusable data import tools: CSV/TSV/XLSX profiling, source-specific prompts, and non-overlapping MySQL imports; includes English documentation and synthetic examples |
 
-## 数据接入工具 / Data-import tool
+## Data Import Tool
 
-[`tools/data_importer/`](tools/data_importer/) 提供可复用的数据接入工具及安装、配置和测试说明。工具接收已获取的表格数据，生成作物/数据源专属的接入包，并支持将数据发布到已配置的 MySQL。它不自动获取外部平台数据、不修改现有 n8n 工作流，也不执行跨来源数据协调或自动同步。来源语义和工作流连接仍需配置。该目录只提供源码、测试和合成示例，不包含实际种质记录或部署凭据。
+[`tools/data_importer/`](tools/data_importer/) provides reusable data import tools along with installation, configuration, and testing instructions. The tool accepts acquired tabular data, generates source-specific import packages, and supports publishing data to a configured MySQL database. It does not automatically retrieve data from external platforms, modify existing n8n workflows, or perform cross-source data reconciliation or automatic synchronization. Source semantics and workflow connections still require configuration. This directory provides only source code, tests, and synthetic examples; it does not contain actual germplasm records or deployment credentials.
 
 The reusable [data-import tool](tools/data_importer/) includes source code, tests, and an English usage guide. It prepares source-specific retrieval packages from tabular datasets and supports non-overwriting publication to a configured MySQL deployment. The included example is synthetic; no additional germplasm records or deployment credentials are distributed with the tool.
 
-## 引用
+## Citation
 
-若在研究中使用了本框架，请引用本研究论文（DOI:）。
+If you use this framework in your research, please cite this research paper (DOI:).
 
-## 许可
+## License
 
-数据导入工具 [`tools/data_importer/`](tools/data_importer/)（含该目录内的说明、测试和合成示例）采用 [MIT License](tools/data_importer/LICENSE)，版权所有 © 2026 Bintao Pan。此许可证不适用于仓库其他目录，不授予外部种质数据或其他第三方数据的使用权；第三方依赖遵循其各自许可证。
+The data import tool [`tools/data_importer/`](tools/data_importer/) (including the documentation, tests, and synthetic examples in this directory) is licensed under the [MIT License](tools/data_importer/LICENSE). Copyright © 2026 Bintao Pan. This license does not apply to other directories in the repository and does not grant the right to use external germplasm data or other third-party data; third-party dependencies are subject to their respective licenses.
 
