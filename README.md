@@ -22,7 +22,8 @@ CropMaestro integrates two search strategies:
 - **Knowledge-Enhanced Search**: Retrieves task-relevant crop standards, trait explanations, and data source-specific knowledge to assist in converting natural language queries into appropriate fields and filter criteria.
 - **Concurrent Adversarial Search**: Multiple search agents generate and execute candidate queries in parallel; an evaluation agent then compares their alignment with the user’s query to select the final result.
 
- <img width="2487" height="1319" alt="Figure3" src="https://github.com/user-attachments/assets/59ddfad3-876a-4f9f-a4ca-8c765e849e0c" />
+<img width="2487" height="1319" alt="figure3" src="https://github.com/user-attachments/assets/a4dd3b41-5b4e-408d-8e4c-17fc8bf372e7" />
+
 
 
 ## Evaluation Benchmark and Repository Contents
