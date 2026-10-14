@@ -31,7 +31,7 @@ The reusable [data-import tool](tools/data_importer/) includes source code, test
 
 ## 引用
 
-若在研究中使用了本框架，请引用您的论文条目（发表后补充 DOI / arXiv）。
+若在研究中使用了本框架，请引用本研究论文（DOI:）。
 
 ## 许可
 
