@@ -14,6 +14,7 @@ CropMaestro employs a four-layer multi-agent architecture:
   
 <img width="2386" height="1269" alt="Figure1" src="https://github.com/user-attachments/assets/fcb4d310-4a49-4b2f-9061-d5c7597201a5" />
 
+
 The framework adapts to different search tasks by loading data sources along with the corresponding field definitions, units of measurement, category definitions, and related knowledge for each crop. Different data sources can reuse the same core workflow, but each query is executed within the selected data source; records from different sources are not merged for combined filtering or sorting.
 
 CropMaestro integrates two search strategies:
@@ -22,6 +23,7 @@ CropMaestro integrates two search strategies:
 - **Concurrent Adversarial Search**: Multiple search agents generate and execute candidate queries in parallel; an evaluation agent then compares their alignment with the user’s query to select the final result.
 
  <img width="2487" height="1319" alt="Figure3" src="https://github.com/user-attachments/assets/59ddfad3-876a-4f9f-a4ca-8c765e849e0c" />
+
 
 ## Evaluation Benchmark and Repository Contents
 We have developed the Crop Germplasm Resource Retrieval Evaluation Benchmark **[CGR-Bench](cgr_bench/)**, which includes 150 queries across five major crop types and covers three difficulty levels. It is designed to evaluate the quality of field selection, retrieval criteria, and returned germplasm records.
