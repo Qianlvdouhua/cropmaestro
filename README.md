@@ -34,7 +34,7 @@ Traditional form-based retrieval typically requires users to be familiar with tr
   <tr>
     <td align="center" valign="top" width="50%">
       <h3>Platform Overview</h3>
-      <p>Discover CropMaestro and its main functions.</p>
+      <p>Explore CropMaestro.</p>
       <a href="https://github.com/user-attachments/assets/be01baf7-7cfd-46ae-b925-fed9088f7180">
         <img width="440" alt="CropMaestro platform overview"
              src="https://github.com/user-attachments/assets/be01baf7-7cfd-46ae-b925-fed9088f7180">
@@ -42,7 +42,7 @@ Traditional form-based retrieval typically requires users to be familiar with tr
     </td>
     <td align="center" valign="top" width="50%">
       <h3>Intelligent Retrieval</h3>
-      <p>Describe your germplasm requirements in natural language.</p>
+      <p>Find germplasm using natural language.</p>
       <a href="https://github.com/user-attachments/assets/2ae1b5ba-14d1-40da-95fe-5de192a2146f">
         <img width="440" alt="CropMaestro intelligent retrieval interface"
              src="https://github.com/user-attachments/assets/2ae1b5ba-14d1-40da-95fe-5de192a2146f">
@@ -52,7 +52,7 @@ Traditional form-based retrieval typically requires users to be familiar with tr
   <tr>
     <td align="center" valign="top" width="50%">
       <h3>Mode Guide</h3>
-      <p>Explore available modes and data-source options.</p>
+      <p>Choose your mode and data source.</p>
       <a href="https://github.com/user-attachments/assets/518ee96a-1a77-462e-b936-d3a027d534c9">
         <img width="440" alt="CropMaestro mode guide"
              src="https://github.com/user-attachments/assets/518ee96a-1a77-462e-b936-d3a027d534c9">
@@ -60,7 +60,7 @@ Traditional form-based retrieval typically requires users to be familiar with tr
     </td>
     <td align="center" valign="top" width="50%">
       <h3>Retrieval Results</h3>
-      <p>Review candidate accessions, explanations, and visualizations.</p>
+      <p>View accessions, explanations, and charts.</p>
       <a href="https://github.com/user-attachments/assets/62f4e6a9-dd93-4737-afb6-5e9ff2702038">
         <img width="440" alt="CropMaestro retrieval results"
              src="https://github.com/user-attachments/assets/62f4e6a9-dd93-4737-afb6-5e9ff2702038">
