@@ -1,5 +1,5 @@
 <div align="center">
-  <img width="2172" height="724" alt="image" src="https://github.com/user-attachments/assets/f0888ab3-c66b-4d21-95e4-f47f50e2a365" />
+  <img width="2172" height="724" alt="image" src="https://github.com/user-attachments/assets/be8722c5-8b84-4554-a762-204744847d5f" />
 
   <h1>CropMaestro: Germplasm intelligence,<br>unlocked for everyone.</h1>
 
