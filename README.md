@@ -36,16 +36,14 @@ Traditional form-based retrieval typically requires users to be familiar with tr
       <h3>Platform Overview</h3>
       <p>Discover CropMaestro and its main functions.</p>
       <a href="docs/images/ui_overview.png">
-        <img src="docs/images/ui_overview.png"
-             alt="CropMaestro platform overview" width="440">
+      <img width="3840" height="1907" alt="image" src="https://github.com/user-attachments/assets/be01baf7-7cfd-46ae-b925-fed9088f7180" />
       </a>
     </td>
     <td align="center" valign="top" width="50%">
       <h3>Intelligent Retrieval</h3>
       <p>Describe your germplasm requirements in natural language.</p>
       <a href="docs/images/ui_home.png">
-        <img src="docs/images/ui_home.png"
-             alt="CropMaestro intelligent retrieval interface" width="440">
+        <img width="3840" height="1907" alt="image" src="https://github.com/user-attachments/assets/2ae1b5ba-14d1-40da-95fe-5de192a2146f" />
       </a>
     </td>
   </tr>
@@ -54,16 +52,14 @@ Traditional form-based retrieval typically requires users to be familiar with tr
       <h3>Mode Guide</h3>
       <p>Explore available modes and data-source options.</p>
       <a href="docs/images/ui_modes.png">
-        <img src="docs/images/ui_modes.png"
-             alt="CropMaestro mode guide" width="440">
+        <img width="3840" height="1907" alt="image" src="https://github.com/user-attachments/assets/518ee96a-1a77-462e-b936-d3a027d534c9" />
       </a>
     </td>
     <td align="center" valign="top" width="50%">
       <h3>Retrieval Results</h3>
       <p>Review candidate accessions, explanations, and visualizations.</p>
       <a href="docs/images/ui_results.png">
-        <img src="docs/images/ui_results.png"
-             alt="CropMaestro retrieval results" width="440">
+        <img width="3840" height="1907" alt="image" src="https://github.com/user-attachments/assets/62f4e6a9-dd93-4737-afb6-5e9ff2702038" />
       </a>
     </td>
   </tr>
@@ -75,7 +71,7 @@ Traditional form-based retrieval typically requires users to be familiar with tr
 
 Start with a natural-language request. CropMaestro analyzes your requirements, generates and executes database queries, and presents the returned germplasm records. On-screen status updates show the progress of the retrieval task.
 
-<!-- 在此插入基础模式 MP4 视频 -->
+https://github.com/user-attachments/assets/64f47457-ffea-4725-a3dc-394d9bf2dca2
 
 ### Expert Mode
 
