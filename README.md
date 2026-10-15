@@ -28,6 +28,38 @@ CropMaestro is a multi-agent intelligent retrieval framework designed for crop g
 
 Traditional form-based retrieval typically requires users to be familiar with trait names, evaluation scales, and screening thresholds. CropMaestro organizes requirement understanding, trait-field mapping, database queries, and result interpretation into a collaborative workflow, supporting multi-trait, multi-constraint searches of germplasm data as well as Q&A regarding relevant domain expertise.
 
+## 🌐 Interface Preview
+
+### Home Page
+
+Describe your germplasm requirements in natural language and start a retrieval task through the web interface.
+
+<img width="2048" height="1013" alt="image" src="https://github.com/user-attachments/assets/5560f8e6-c83b-46c3-88a0-961cf031370e" />
+
+
+### Retrieval Modes and Data Sources
+
+Explore the available retrieval configurations and select the data source appropriate to your task.
+
+<img width="3840" height="1907" alt="image" src="https://github.com/user-attachments/assets/67c68004-9c9d-4c7e-b284-02343c6447e1" />
+
+
+### Retrieval Results and Visualizations
+
+Review the returned germplasm records, recommendation explanations, and trait visualizations.
+
+<img width="3840" height="1907" alt="image" src="https://github.com/user-attachments/assets/c92f6152-a931-42e4-a9cb-2a3bf8e92c91" />
+
+
+## 🎬 CropMaestro in Action
+
+### Natural-Language Retrieval in Default Mode
+
+Watch an example retrieval task, from a natural-language request to the returned germplasm records.
+
+<!-- 在此插入已有的基础模式 MP4 视频 -->
+
+The screenshots and demonstrations show the online service. The deployment example distributed in this repository uses the commercial rice dataset; see the repository contents below for details.
 ## Framework Overview
 
 CropMaestro employs a four-layer multi-agent architecture:
