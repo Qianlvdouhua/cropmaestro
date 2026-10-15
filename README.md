@@ -1,5 +1,4 @@
-# CropMaestro
-Germplasm intelligence, unlocked for everyone.
+# CropMaestro:Germplasm intelligence, unlocked for everyone.
 CropMaestro is a multi-agent intelligent retrieval framework designed for crop germplasm resources. It helps agricultural researchers and breeders identify candidate materials that meet their requirements from germplasm data by describing their needs using natural language.
 
 Traditional form-based retrieval typically requires users to be familiar with trait names, evaluation scales, and screening thresholds. CropMaestro organizes requirement understanding, trait-field mapping, database queries, and result interpretation into a collaborative workflow, supporting multi-trait, multi-constraint searches of germplasm data as well as Q&A regarding relevant domain expertise.
