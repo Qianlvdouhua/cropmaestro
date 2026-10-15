@@ -70,18 +70,14 @@ Traditional form-based retrieval typically requires users to be familiar with tr
 ### Default Mode
 
 Start with a natural-language request. CropMaestro analyzes your requirements, generates and executes database queries, and presents the returned germplasm records. On-screen status updates show the progress of the retrieval task.
-
-https://github.com/user-attachments/assets/64f47457-ffea-4725-a3dc-394d9bf2dca2
-
+https://github.com/user-attachments/assets/72b2dfd7-8cf8-4c95-a231-50516fdf63ed
 ### Expert Mode
 
 Expert mode adds knowledge-enhanced retrieval to help interpret requests that require domain-specific information. Relevant crop standards, trait explanations, and source-specific knowledge guide the translation of user requirements into retrieval conditions.
 
 <details>
 <summary>▶ Watch the Expert Mode demonstration</summary>
-
-<!-- 在此插入专家模式 MP4 视频 -->
-
+https://github.com/user-attachments/assets/92db7152-4d85-49e6-9338-a341c578cdf1
 </details>
 
 ### File Mode
@@ -90,9 +86,7 @@ Provide a supported input file together with a natural-language request. The dem
 
 <details>
 <summary>▶ Watch the File Mode demonstration</summary>
-
-<!-- 在此插入文件模式 MP4 视频 -->
-
+https://github.com/user-attachments/assets/364e14e4-42f2-4765-a4f3-6259c1b64d21
 </details>
 
 ### Data-Source Options
