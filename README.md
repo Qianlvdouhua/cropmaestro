@@ -88,9 +88,9 @@ https://github.com/user-attachments/assets/92db7152-4d85-49e6-9338-a341c578cdf1
 
 </details>
 
-### File Mode
+### Robust Mode
 
-Provide a supported input file together with a natural-language request. The demonstration below illustrates how to submit a file-based task and view its output.
+Robust mode uses concurrent retrieval agents to generate and execute candidate queries. A review agent compares the candidates against the user’s requirements and selects the final result.
 
 <details>
 <summary>▶ Watch the File Mode demonstration</summary>
