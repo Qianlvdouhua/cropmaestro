@@ -30,36 +30,85 @@ Traditional form-based retrieval typically requires users to be familiar with tr
 
 ## 🌐 Interface Preview
 
-### Home Page
+<table>
+  <tr>
+    <td align="center" valign="top" width="50%">
+      <h3>Platform Overview</h3>
+      <p>Discover CropMaestro and its main functions.</p>
+      <a href="docs/images/ui_overview.png">
+        <img src="docs/images/ui_overview.png"
+             alt="CropMaestro platform overview" width="440">
+      </a>
+    </td>
+    <td align="center" valign="top" width="50%">
+      <h3>Intelligent Retrieval</h3>
+      <p>Describe your germplasm requirements in natural language.</p>
+      <a href="docs/images/ui_home.png">
+        <img src="docs/images/ui_home.png"
+             alt="CropMaestro intelligent retrieval interface" width="440">
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" valign="top" width="50%">
+      <h3>Mode Guide</h3>
+      <p>Explore available modes and data-source options.</p>
+      <a href="docs/images/ui_modes.png">
+        <img src="docs/images/ui_modes.png"
+             alt="CropMaestro mode guide" width="440">
+      </a>
+    </td>
+    <td align="center" valign="top" width="50%">
+      <h3>Retrieval Results</h3>
+      <p>Review candidate accessions, explanations, and visualizations.</p>
+      <a href="docs/images/ui_results.png">
+        <img src="docs/images/ui_results.png"
+             alt="CropMaestro retrieval results" width="440">
+      </a>
+    </td>
+  </tr>
+</table>
 
-Describe your germplasm requirements in natural language and start a retrieval task through the web interface.
+## 🎬 Modes and Demonstrations
 
-<img width="2048" height="1013" alt="image" src="https://github.com/user-attachments/assets/5560f8e6-c83b-46c3-88a0-961cf031370e" />
+### Default Mode
 
+Start with a natural-language request. CropMaestro analyzes your requirements, generates and executes database queries, and presents the returned germplasm records. On-screen status updates show the progress of the retrieval task.
 
-### Retrieval Modes and Data Sources
+<!-- 在此插入基础模式 MP4 视频 -->
 
-Explore the available retrieval configurations and select the data source appropriate to your task.
+### Expert Mode
 
-<img width="3840" height="1907" alt="image" src="https://github.com/user-attachments/assets/67c68004-9c9d-4c7e-b284-02343c6447e1" />
+Expert mode adds knowledge-enhanced retrieval to help interpret requests that require domain-specific information. Relevant crop standards, trait explanations, and source-specific knowledge guide the translation of user requirements into retrieval conditions.
 
+<details>
+<summary>▶ Watch the Expert Mode demonstration</summary>
 
-### Retrieval Results and Visualizations
+<!-- 在此插入专家模式 MP4 视频 -->
 
-Review the returned germplasm records, recommendation explanations, and trait visualizations.
+</details>
 
-<img width="3840" height="1907" alt="image" src="https://github.com/user-attachments/assets/c92f6152-a931-42e4-a9cb-2a3bf8e92c91" />
+### File Mode
 
+Provide a supported input file together with a natural-language request. The demonstration below illustrates how to submit a file-based task and view its output.
 
-## 🎬 CropMaestro in Action
+<details>
+<summary>▶ Watch the File Mode demonstration</summary>
 
-### Natural-Language Retrieval in Default Mode
+<!-- 在此插入文件模式 MP4 视频 -->
 
-Watch an example retrieval task, from a natural-language request to the returned germplasm records.
+</details>
 
-<!-- 在此插入已有的基础模式 MP4 视频 -->
+### Data-Source Options
 
-The screenshots and demonstrations show the online service. The deployment example distributed in this repository uses the commercial rice dataset; see the repository contents below for details.
+CropMaestro also provides options for switching the dataset used for retrieval:
+
+- **Commercial Varieties**: Search the commercial rice variety dataset through the natural-language interface.
+- **International Data**: Search the currently integrated AfricaRice rice accession records obtained through Genesys. This option covers the imported dataset, rather than the complete Genesys database.
+
+Queries are executed within the selected data source, using its corresponding fields and retrieval configuration. Records from different sources are not combined for joint filtering or ranking.
+
+> The screenshots and videos demonstrate the online service. The deployment example provided in this repository uses the commercial rice dataset and does not include all datasets available through the online service.
 ## Framework Overview
 
 CropMaestro employs a four-layer multi-agent architecture:
