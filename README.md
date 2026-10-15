@@ -1,4 +1,27 @@
-# CropMaestro:Germplasm intelligence, unlocked for everyone.
+<div align="center">
+  <h1>CropMaestro: Germplasm intelligence,<br>unlocked for everyone.</h1>
+
+  <p>A multi-agent framework for natural-language crop germplasm retrieval.</p>
+
+  <p>
+    <a href="https://github.com/Qianlvdouhua/cropmaestro/stargazers">
+      <img src="https://img.shields.io/github/stars/Qianlvdouhua/cropmaestro" alt="GitHub stars">
+    </a>
+    <a href="https://github.com/Qianlvdouhua/cropmaestro/forks">
+      <img src="https://img.shields.io/github/forks/Qianlvdouhua/cropmaestro" alt="GitHub forks">
+    </a>
+  </p>
+
+  <p>
+    <a href="http://122.9.8.16/">Online Demo</a>
+    ·
+    <a href="docs/setup.md">Installation</a>
+    ·
+    <a href="cgr_bench/">CGR-Bench</a>
+    ·
+    <a href="tools/data_importer/">Data-import Tool</a>
+  </p>
+</div>
 CropMaestro is a multi-agent intelligent retrieval framework designed for crop germplasm resources. It helps agricultural researchers and breeders identify candidate materials that meet their requirements from germplasm data by describing their needs using natural language.
 
 Traditional form-based retrieval typically requires users to be familiar with trait names, evaluation scales, and screening thresholds. CropMaestro organizes requirement understanding, trait-field mapping, database queries, and result interpretation into a collaborative workflow, supporting multi-trait, multi-constraint searches of germplasm data as well as Q&A regarding relevant domain expertise.
