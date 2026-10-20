@@ -47,4 +47,4 @@ CGR-Bench 在此开源的目的是：提供可复用的**题目与金标**，供
 
 ## 引用
 
-若在研究中使用了 CGR-Bench，请与 CropMaestro 一并引用您的论文条目（发表后补充 DOI / arXiv）。
+若在研究中使用了 CGR-Bench，请引用（DOI：）。
