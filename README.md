@@ -28,7 +28,7 @@ CropMaestro is a multi-agent intelligent retrieval framework designed for crop g
 
 Traditional form-based retrieval typically requires users to be familiar with trait names, evaluation scales, and screening thresholds. CropMaestro organizes requirement understanding, trait-field mapping, database queries, and result interpretation into a collaborative workflow, supporting multi-trait, multi-constraint searches of germplasm data as well as Q&A regarding relevant domain expertise.
 
-## 🌐 Interface Preview
+##  Interface Preview
 
 <table>
   <tr>
@@ -69,7 +69,7 @@ Traditional form-based retrieval typically requires users to be familiar with tr
   </tr>
 </table>
 
-## 🎬 Modes and Demonstrations
+##  Modes and Demonstrations
 
 ### Default Mode
 
