@@ -119,6 +119,8 @@ CropMaestro employs a four-layer multi-agent architecture:
 - **Interpretation Layer**: Summarizes search results, providing trait interpretations, rationale for recommendations, and visualizations.
   
 <img width="2386" height="1269" alt="Figure1" src="https://github.com/user-attachments/assets/fcb4d310-4a49-4b2f-9061-d5c7597201a5" />
+<img width="1720" height="914" alt="image" src="https://github.com/user-attachments/assets/da2337ad-3304-4e17-b149-16c59421e1ed" />
+
 
 
 The framework adapts to different search tasks by loading data sources along with the corresponding field definitions, units of measurement, category definitions, and related knowledge for each crop. Different data sources can reuse the same core workflow, but each query is executed within the selected data source; records from different sources are not merged for combined filtering or sorting.
