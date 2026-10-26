@@ -17,7 +17,7 @@
   <p>
     <a href="http://122.9.8.16/">Online Demo</a>
     ·
-    <a href="docs/setup.md">Installation</a>
+    <a href="docs/setup.md">Workflow Setup</a>
     ·
     <a href="cgr_bench/">CGR-Bench</a>
     ·
@@ -93,7 +93,7 @@ https://github.com/user-attachments/assets/92db7152-4d85-49e6-9338-a341c578cdf1
 Robust mode uses concurrent retrieval agents to generate and execute candidate queries. A review agent compares the candidates against the user’s requirements and selects the final result.
 
 <details>
-<summary>▶ Watch the File Mode demonstration</summary>
+<summary>▶ Watch the Robust Mode demonstration</summary>
   
 https://github.com/user-attachments/assets/364e14e4-42f2-4765-a4f3-6259c1b64d21
 
@@ -108,7 +108,8 @@ CropMaestro also provides options for switching the dataset used for retrieval:
 
 Queries are executed within the selected data source, using its corresponding fields and retrieval configuration. Records from different sources are not combined for joint filtering or ranking.
 
-> The screenshots and videos demonstrate the online service. The deployment example provided in this repository uses the commercial rice dataset and does not include all datasets available through the online service.
+> The screenshots and videos demonstrate the hosted online service. Its frontend source code is not included in this repository. The released workflow example uses the commercial rice dataset and does not include all datasets available through the online service.
+
 ## Framework Overview
 
 CropMaestro employs a four-layer multi-agent architecture:
@@ -135,36 +136,51 @@ CropMaestro integrates two search strategies:
 ## Evaluation Benchmark and Repository Contents
 We have developed the Crop Germplasm Resource Retrieval Evaluation Benchmark **[CGR-Bench](cgr_bench/)**, which includes 150 queries across five major crop types and covers three difficulty levels. It is designed to evaluate the quality of field selection, retrieval criteria, and returned germplasm records.
 
-This repository provides an anonymized n8n workflow, **commercial rice (`bus_rice`)** four-level prompts, MySQL table structures, scripts for importing commercial variety data, and reusable data integration tools.
+This repository provides n8n workflow exports, **commercial rice (`bus_rice`)** four-layer prompts, MySQL table structures and a commercial variety data dump, together with a reusable data-import tool.
 
 The CGR-Bench directory provides query examples and reference annotations, but **does not include germplasm repository data for the five crop types**. Therefore, the commercial rice deployment example in the repository cannot be used directly to complete all 150 benchmark queries; see the directory description for specific usage conditions.
 
-## Quick Start
+## What You Can Run from This Repository
 
-1. Run [schema/ddl](schema/ddl) and import [data/bus_rice_data.sql](data/bus_rice_data.sql)
-2. Start [backend/](backend/) (Status API 5000; optional GS API 8000)
-3. Follow [docs/setup.md](docs/setup.md) to mount `prompts/bus_rice/` to n8n `/data`
-4. Import [workflow/CropMaestro.workflow.json](workflow/CropMaestro.workflow.json) and bind MySQL / LLM credentials
-5. Set `“commercialMode”: true` when calling the webhook (commercial rice repository branch)
+The released implementation is centered on **n8n workflows and data-source configuration**, not a standalone web application. Retrieval is performed by the workflows calling model services and MySQL. You can invoke the main workflow through its n8n Webhook without recreating the hosted UI, or connect a client of your own.
+
+- **Included:** the main workflow and concurrent-search sub-workflow, commercial rice data and prompts, SQL schemas, benchmark annotations, data-import tooling, and auxiliary service code.
+- **Not included:** the hosted frontend, all online-service datasets, a populated vector knowledge index, GS prediction model artifacts, or deployment credentials.
+- **Configuration required:** model endpoints and IDs, credentials, prompt-file mounts, and sub-workflow references must match your environment. The exported workflows are not a one-command deployment of the hosted service.
+
+`backend/status_api.py` is a **progress-tracking helper**, not the intelligent retrieval backend. It stores and exposes task status for client polling. The current workflow calls it inline, so either run it or explicitly bypass the callback nodes. The separate GS prediction service is an optional extension, not a requirement for the commercial rice text-retrieval example.
+
+## Quick Start: Commercial Rice Workflow
+
+Follow the [workflow setup guide](docs/setup.md) for the complete commands, node configuration, and troubleshooting steps:
+
+1. Clone the repository and prepare a self-hosted n8n instance, MySQL, and the model services you intend to use.
+2. Create a fresh demo database and import the [commercial rice data and runtime table schemas](data/README_DATA.md). The data dump replaces `bus_rice_data`; do not import it into an existing production dataset.
+3. Prepare the commercial rice field descriptions and prompts under the n8n `/data` mount. Preserve the expected `Mapping/` and `Prompt/` subdirectories.
+4. Import the [main workflow](workflow/CropMaestro.workflow.json), configure its MySQL/model nodes, and handle the auxiliary status callbacks and optional logging integrations described in the guide.
+5. For Robust mode, also import the [concurrent-search sub-workflow](workflow/Concurrent%20Adversarial%20Search-Opensource.json), configure its model nodes, and rebind the main workflow's sub-workflow reference.
+6. Test the main Webhook with a commercial rice request. Start with `commercialMode: true`, `expertMode: false`, and `stableMode: false`; enable additional strategies only after preparing their dependencies.
+
+The exported workflow uses `expertMode` for knowledge enhancement and **`stableMode` for Robust mode**. These are fields inside the request's `config` object; `query.chatInput` contains the question and `context.sessionId` identifies the conversation. See the [complete request example](docs/setup.md#7-call-the-workflow-through-its-webhook).
+
+For custom datasets, use the [data-import tool](tools/data_importer/) and then configure the corresponding workflow routing and prompt paths. Importing a dataset does not automatically configure n8n or create a vector knowledge index.
 
 ## Directory Overview
 
 | Directory | Description |
 |------|------|
-| `workflow/` | n8n JSON |
+| `workflow/` | Main n8n workflow and concurrent-search sub-workflow exports |
 | `prompts/bus_rice/` | Four-layer prompts for commercial rice |
-| `schema/` | DDL + `schema_bus_rice_demo.txt` |
+| `schema/` | Runtime table DDL and combined demo schema reference |
 | `data/` | `bus_rice_data.sql` commercial variety data |
 | `cgr_bench/` | CGR-Bench Gold Standard Dataset (150 questions, five crops; note that the scope differs from open-source data) |
-| `backend/` | State Synchronization and GS Prediction Service |
-| `docs/` | Architecture and Deployment |
+| `backend/` | Auxiliary task-status API and optional GS prediction service; not the retrieval engine |
+| `docs/` | Workflow architecture, configuration, and setup instructions |
 | [`tools/data_importer/`](tools/data_importer/) | Reusable data import tools: CSV/TSV/XLSX profiling, source-specific prompts, and non-overlapping MySQL imports; includes English documentation and synthetic examples |
 
 ## Data Import Tool
 
 [`tools/data_importer/`](tools/data_importer/) provides reusable data import tools along with installation, configuration, and testing instructions. The tool accepts acquired tabular data, generates source-specific import packages, and supports publishing data to a configured MySQL database. It does not automatically retrieve data from external platforms, modify existing n8n workflows, or perform cross-source data reconciliation or automatic synchronization. Source semantics and workflow connections still require configuration. This directory provides only source code, tests, and synthetic examples; it does not contain actual germplasm records or deployment credentials.
-
-The reusable [data-import tool](tools/data_importer/) includes source code, tests, and an English usage guide. It prepares source-specific retrieval packages from tabular datasets and supports non-overwriting publication to a configured MySQL deployment. The included example is synthetic; no additional germplasm records or deployment credentials are distributed with the tool.
 
 ## License
 

@@ -1,50 +1,53 @@
-# Architecture
+# Workflow Architecture
 
-CropMaestro orchestrates n8n agents with MySQL and optional backend HTTP services. The open-source demo uses **commercial rice** (`bus_rice_data`) only.
+CropMaestro's released retrieval implementation runs in **n8n**, calling model services and MySQL with data-source-specific prompts. The commercial rice example uses `bus_rice_data`.
 
-## Repository Layout
+The hosted website is a separate application. Its screenshots/videos illustrate the service, but its frontend source is not included. A Webhook client can invoke the released workflow without that UI.
 
-```text
-cropmaestro/
-├── workflow/
-├── prompts/bus_rice/      # Four-layer prompts (commercial rice)
-├── schema/ddl/
-├── data/bus_rice_data.sql
-├── backend/
-└── docs/
-```
-
-## Runtime Flow
+## Core retrieval path
 
 ```mermaid
 flowchart LR
-  A[Client / Webhook] --> B[n8n Workflow]
-  B --> S[Status API :5000]
-  B --> C[Context + commercialMode]
-  C --> D[crop → bus_rice]
-  D --> E[bus_rice prompts]
-  E --> F[LLM → SQL]
-  F --> G[(bus_rice_data)]
-  G --> H[(bus_rice_cache_results)]
-  H --> I[Summarizer]
-  I --> J[(chat_memory)]
-  B -. optional .-> GS[GS API :8000]
+  A[Webhook client or user-supplied UI] --> B[Main n8n workflow]
+  B --> C[Control and analysis]
+  C --> D[Execution and query selection]
+  D --> E[Interpretation]
+  E --> F[Webhook response]
+  P[Source field descriptions and prompts] -.-> C
+  P -.-> D
+  P -.-> E
+  L[Configured model services] -.-> C
+  L -.-> D
+  L -.-> E
+  D <--> M[(MySQL records and query cache)]
+  B <--> H[(Conversation memory)]
 ```
 
-## Tables
+The four layers cover task control, crop/field interpretation, SQL execution, and result interpretation. They are implemented by workflow nodes, not by the status API.
 
-| Table | Role |
-| --- | --- |
-| `bus_rice_data` | Commercial variety records |
-| `bus_rice_cache_results` | Query hit cache |
-| `chat_memory` | Multi-turn session + SQL cache |
-| `request_status` | UI progress (`status_api.py`) |
+## Strategy and integration dependencies
 
-## Prompt mount paths (n8n `/data`)
+- **Knowledge enhancement:** analysis can retrieve field-level knowledge from a configured vector collection. A Qdrant connection, populated source-specific collections, and a compatible embedding service are required. A populated index is not distributed.
+- **Concurrent adversarial retrieval:** the main workflow calls the separately exported concurrent-search workflow. Import it and rebind the reference in your n8n instance before using `stableMode`.
+- **Progress tracking:** `backend/status_api.py` receives status updates and exposes them for client polling. It does not run retrieval. Current callbacks are inline dependencies; run the helper or explicitly bypass those nodes.
+- **GS prediction:** `backend/gs_predict_api.py` launches an optional extension. It is not needed for commercial rice text retrieval and requires separate model artifacts.
+- **Optional logging:** the main workflow references a `Save process` workflow that is not distributed. Configure a compatible replacement or bypass it on the paths you use.
 
-| Layer | File |
-| --- | --- |
-| Control | `bus_rice_data.txt` |
-| Analysis | `Mapping/bus_rice_mapping_data.txt` |
-| Execution | `Prompt/bus_rice_score_prompt.txt`, `bus_rice_conditional_prompt.txt` |
-| Interpretation | `Prompt/unit/bus_rice_unit.txt`, `rule/bus_rice_rule.txt` |
+See [Workflow Setup](setup.md) for the node names and configuration steps.
+
+## Data and runtime configuration
+
+- `bus_rice_data`: commercial variety records supplied by the SQL dump.
+- `bus_rice_cache_results`: query-result cache linked to session/query metadata.
+- `chat_memory`: conversation history and query metadata.
+- `request_status`: progress and confirmation information used by the status helper.
+
+For commercial rice, file readers expect `/data/bus_rice_data.txt`, `/data/Mapping/bus_rice_mapping_data.txt`, and source-specific files under `/data/Prompt/`, including `rule/` and `unit/`. The combined `/data/hrmshcema.txt` reference is separate from the per-table descriptions.
+
+The request carries flags under `config`, the session under `context`, and the question under `query`. `commercialMode` routes rice to the shipped commercial source, `expertMode` selects knowledge enhancement, and `stableMode` selects the Robust path.
+
+## Extending a source
+
+The [data-import tool](../tools/data_importer/) prepares source-specific tables and prompt packages from acquired tabular data. It does not alter n8n workflows, create a complete vector index, or supply the hosted frontend. Review field meanings and configure routing, file paths, model connections, and any vector collection for each source.
+
+Each query uses its selected source. Different sources are not automatically harmonized or combined for joint filtering/ranking. The public commercial rice example and the five-crop CGR-Bench annotations have different data scopes.
