@@ -166,10 +166,6 @@ The CGR-Bench directory provides query examples and reference annotations, but *
 
 The reusable [data-import tool](tools/data_importer/) includes source code, tests, and an English usage guide. It prepares source-specific retrieval packages from tabular datasets and supports non-overwriting publication to a configured MySQL deployment. The included example is synthetic; no additional germplasm records or deployment credentials are distributed with the tool.
 
-## Citation
-
-If you use this framework in your research, please cite this research paper (DOI:).
-
 ## License
 
 The data import tool [`tools/data_importer/`](tools/data_importer/) (including the documentation, tests, and synthetic examples in this directory) is licensed under the [MIT License](tools/data_importer/LICENSE). Copyright © 2026 Bintao Pan. This license does not apply to other directories in the repository and does not grant the right to use external germplasm data or other third-party data; third-party dependencies are subject to their respective licenses.
