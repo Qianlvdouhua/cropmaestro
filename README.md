@@ -129,6 +129,7 @@ CropMaestro integrates two search strategies:
 - **Concurrent Adversarial Search**: Multiple search agents generate and execute candidate queries in parallel; an evaluation agent then compares their alignment with the user’s query to select the final result.
 
 <img width="2487" height="1319" alt="figure3" src="https://github.com/user-attachments/assets/a4dd3b41-5b4e-408d-8e4c-17fc8bf372e7" />
+<img width="3152" height="1641" alt="image" src="https://github.com/user-attachments/assets/9529ea40-5280-47dc-aab4-7bb9c6552447" />
 
 
 
