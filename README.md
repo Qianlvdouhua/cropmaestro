@@ -118,7 +118,7 @@ CropMaestro employs a four-layer multi-agent architecture:
 - **Execution Layer**: Generates and executes database queries, filtering candidate germplasm records based on search strategies.
 - **Interpretation Layer**: Summarizes search results, providing trait interpretations, rationale for recommendations, and visualizations.
   
-<img width="2386" height="1269" alt="Figure1" src="https://github.com/user-attachments/assets/fcb4d310-4a49-4b2f-9061-d5c7597201a5" />
+<img width="2379" height="1289" alt="image" src="https://github.com/user-attachments/assets/daf736ac-1b54-400b-9823-589b9d376688" />
 
 
 The framework adapts to different search tasks by loading data sources along with the corresponding field definitions, units of measurement, category definitions, and related knowledge for each crop. Different data sources can reuse the same core workflow, but each query is executed within the selected data source; records from different sources are not merged for combined filtering or sorting.
@@ -128,7 +128,6 @@ CropMaestro integrates two search strategies:
 - **Knowledge-Enhanced Search**: Retrieves task-relevant crop standards, trait explanations, and data source-specific knowledge to assist in converting natural language queries into appropriate fields and filter criteria.
 - **Concurrent Adversarial Search**: Multiple search agents generate and execute candidate queries in parallel; an evaluation agent then compares their alignment with the user’s query to select the final result.
 
-<img width="2487" height="1319" alt="figure3" src="https://github.com/user-attachments/assets/a4dd3b41-5b4e-408d-8e4c-17fc8bf372e7" />
 <img width="3152" height="1641" alt="image" src="https://github.com/user-attachments/assets/9529ea40-5280-47dc-aab4-7bb9c6552447" />
 
 
