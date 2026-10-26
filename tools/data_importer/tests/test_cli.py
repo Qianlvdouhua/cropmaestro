@@ -38,6 +38,30 @@ class CliTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn('config', result.stderr)
 
+    def test_maize_alias_prepares_a_canonical_corn_package(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / 'maize.csv'
+            source.write_text('crop,accession,height_cm\nmaize,A001,150\n', encoding='utf-8')
+            out = Path(tmp) / 'prepared'
+            result = self.command('prepare', source, '--crop', 'maize', '--offline', '--out', out)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            checked = self.command('verify', out)
+            self.assertEqual(checked.returncode, 0, checked.stderr)
+            self.assertEqual(json.loads(checked.stdout)['crop'], 'corn')
+
+    def test_corrupt_xlsx_returns_structured_failure_without_traceback(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / 'rice.xlsx'
+            source.write_bytes(b'not an XLSX archive')
+            out = Path(tmp) / 'prepared'
+            result = self.command('prepare', source, '--crop', 'rice', '--offline', '--out', out)
+            self.assertEqual(result.returncode, 1)
+            self.assertNotIn('Traceback', result.stderr)
+            report = json.loads(result.stderr)
+            self.assertEqual(report['status'], 'FAILED')
+            self.assertIn('XLSX', report['message'])
+            self.assertFalse(out.exists())
+
     def test_deploy_prompts_preview(self):
         with tempfile.TemporaryDirectory() as tmp:
             directory = Path(tmp)

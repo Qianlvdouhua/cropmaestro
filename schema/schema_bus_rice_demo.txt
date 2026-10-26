@@ -46,3 +46,4 @@ created_at	timestamp
 sql	text
 query_hash	varchar(64)
 varieties	text
+graphConfig	JSON	结果可视化配置；可为空

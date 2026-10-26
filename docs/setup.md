@@ -47,6 +47,24 @@ Do not additionally import `01_bus_rice_data.sql` for this path: the dump alread
 
 The runtime uses `bus_rice_data` for records, `bus_rice_cache_results` for query results, `chat_memory` for conversation/query metadata, and `request_status` for progress tracking. Configure a dedicated application account with the permissions required by those operations rather than using the administrative import account at runtime. See [data scope and import notes](../data/README_DATA.md).
 
+### Existing installations: check the shared memory schema
+
+The workflow and data-import tool expect `chat_memory.graphConfig` for cached visualization configuration. New installations using the current DDL have this nullable JSON column. `CREATE TABLE IF NOT EXISTS` does not add it to an older existing table.
+
+For an existing database, back up the table and inspect its columns first. Do **not** rerun the commercial rice dump to upgrade this shared schema.
+
+```sql
+SHOW COLUMNS FROM chat_memory LIKE 'graphConfig';
+```
+
+Only if the column is absent, have the database administrator apply the following statement to the intended database during an appropriate maintenance window:
+
+```sql
+ALTER TABLE chat_memory ADD COLUMN graphConfig JSON NULL COMMENT '结果可视化配置；无图表时为空';
+```
+
+If the column already exists, do not add it again or change its type blindly. Review its existing contract before any migration. The importer does not execute this shared-table alteration automatically.
+
 ## 3. Prepare field descriptions and prompt files
 
 The workflow reads filenames derived from the selected source. For commercial rice, `crop` maps rice to `bus_rice` when `commercialMode` is true. Mounting the repository's prompt directory alone does not reproduce the expected layout.

@@ -68,6 +68,37 @@ class DataTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, '多作物|mixed'):
             self.module().profile_table(table, crop='rice')
 
+    def test_explicit_crop_aliases_match_observed_crop(self):
+        mod = self.module()
+        for observed, requested, expected in (
+            ('maize', 'maize', 'corn'), ('玉米', 'MAIZE', 'corn'),
+            ('corn', '玉米', 'corn'), ('rice', 'oryza', 'rice'),
+            ('水稻', 'Rice', 'rice'),
+        ):
+            with self.subTest(observed=observed, requested=requested):
+                table = self.read(f'crop,编号\n{observed},001\n')
+                self.assertEqual(mod.profile_table(table, crop=requested)['crop'], expected)
+
+    def test_crop_alias_does_not_hide_a_genuine_mismatch(self):
+        table = self.read('crop,编号\nwheat,001\n')
+        with self.assertRaisesRegex(ValueError, '冲突'):
+            self.module().profile_table(table, crop='maize')
+
+    def test_corrupt_xlsx_has_actionable_value_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / 'rice.xlsx'
+            path.write_bytes(b'not an XLSX archive')
+            with self.assertRaisesRegex(ValueError, 'XLSX.*损坏|XLSX.*无效'):
+                self.module().read_table(path)
+
+    def test_incomplete_xlsx_archive_has_actionable_value_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / 'rice.xlsx'
+            with zipfile.ZipFile(path, 'w') as archive:
+                archive.writestr('unrelated.txt', 'not a workbook')
+            with self.assertRaisesRegex(ValueError, 'XLSX.*损坏|XLSX.*无效'):
+                self.module().read_table(path)
+
     def test_explicit_legacy_encoding_and_mixed_values(self):
         mod = self.module()
         with tempfile.TemporaryDirectory() as tmp:

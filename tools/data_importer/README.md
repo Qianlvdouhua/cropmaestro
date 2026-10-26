@@ -1,6 +1,6 @@
 # CropMaestro data-import tool
 
-Version 0.3.0. This tool prepares crop- and source-specific retrieval packages from CSV, TSV, or XLSX data and supports non-overwriting publication to an existing MySQL deployment. It is the data-import component used when adapting CropMaestro to additional datasets.
+Version 0.3.1. This tool prepares crop- and source-specific retrieval packages from CSV, TSV, or XLSX data and supports non-overwriting publication to an existing MySQL deployment. It is the data-import component used when adapting CropMaestro to additional datasets.
 
 ## License
 
@@ -50,6 +50,8 @@ outputs/demo_rice/
 
 For your own input, choose one crop per file and a distinct dataset prefix for each source. The crop identifies the crop context; the prefix names the source-specific tables and prompt files. `--sheet` selects an XLSX worksheet and `--encoding` selects a non-default CSV encoding. Spreadsheet formulas are not evaluated; supply value-only data.
 
+Recognized crop aliases are normalized consistently whether inferred from the file or supplied with `--crop`: for example, `maize` and `玉米` become `corn`. Dataset prefixes remain explicit identifiers and are not renamed by crop-alias normalization. Corrupt or incomplete XLSX inputs return a structured failure instead of a raw ZIP/archive traceback.
+
 ## Source-specific interpretation
 
 The tool calculates counts, missing values, observed categories, and numerical summaries from the input. These describe the supplied dataset; they are not universal trait thresholds or optimal breeding values.
@@ -66,6 +68,8 @@ The importer does not automatically populate Qdrant or build a complete knowledg
 ## MySQL configuration and publication
 
 Copy `config.example.json` to a local `config.json` and configure the existing database, host, port, and user. The example is intentionally not ready to publish. The database and the compatible shared `chat_memory` table must already exist.
+
+The shared table must include `graphConfig`, which the runtime reads for cached visualization results. The repository's fresh-install DDL includes this nullable JSON column. For a database created from an older version, follow the [existing-install schema check](../../docs/setup.md#existing-installations-check-the-shared-memory-schema) before publishing; the importer does not automatically alter the shared table. Set `template_cache_table` to a table actually present in your deployment, such as `bus_rice_cache_results` for the shipped example, rather than leaving a nonexistent template name.
 
 Credentials are read from environment variables identified by `mysql.password_env` and, if needed, `llm.api_key_env`. Never put actual passwords or keys in the JSON file or commit local configuration. Remote database connections require a configured `mysql.ssl_ca` for certificate verification unless a trusted private network has been explicitly configured. Do not send database credentials over an untrusted plaintext connection.
 

@@ -82,8 +82,10 @@ def read_table(path, encoding=None, sheet=None):
     source = {'filename': path.name, 'sha256': hashlib.sha256(raw).hexdigest()}
     if path.suffix.lower() == '.xlsx':
         import openpyxl
-        book = openpyxl.load_workbook(path, read_only=True, data_only=False)
+        from openpyxl.utils.exceptions import InvalidFileException
+        book = None
         try:
+            book = openpyxl.load_workbook(path, read_only=True, data_only=False)
             if sheet is None and len(book.sheetnames) != 1:
                 raise ValueError('XLSX 含多张工作表，请用 --sheet 明确选择')
             selected = sheet or book.sheetnames[0]
@@ -108,8 +110,11 @@ def read_table(path, encoding=None, sheet=None):
                     row.append(value)
                 records.append(row)
             source.update(encoding='xlsx', sheet=selected)
+        except (zipfile.BadZipFile, ET.ParseError, KeyError, InvalidFileException) as exc:
+            raise ValueError('XLSX 文件损坏或结构无效，请确认文件完整并重新导出为纯值 .xlsx 工作簿') from exc
         finally:
-            book.close()
+            if book is not None:
+                book.close()
     elif path.suffix.lower() in {'.csv', '.tsv', '.txt'}:
         selected_encoding = encoding or ('utf-16' if raw.startswith((b'\xff\xfe', b'\xfe\xff')) else 'utf-8-sig')
         try:
@@ -160,7 +165,8 @@ def _crop(table, requested):
                 raise ValueError('检测到多作物 mixed crops，请先拆分数据')
             observed |= normalized
     if requested:
-        selected = requested.lower()
+        requested_name = requested.strip().casefold()
+        selected = CROP_NAMES.get(requested_name, requested_name)
         if not re.fullmatch(r'[a-z][a-z0-9_]{0,31}', selected):
             raise ValueError('作物前缀须为小写英文字母开头，最多32字符')
         if observed and selected not in observed:

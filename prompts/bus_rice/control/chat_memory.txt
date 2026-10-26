@@ -9,3 +9,4 @@ created_at	timestamp	创建时间
 sql	text	
 query_hash	varchar(64)	
 varieties	text	查询问题相关品种
+graphConfig	JSON	结果可视化配置；可为空

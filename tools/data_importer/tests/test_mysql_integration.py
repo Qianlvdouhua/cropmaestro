@@ -7,6 +7,7 @@ import tempfile
 import unittest
 import uuid
 import hashlib
+import re
 from unittest.mock import patch
 
 from cm_importer.package import prepare_package
@@ -82,6 +83,23 @@ class MySQLIntegrationTests(unittest.TestCase):
             info = inspect_database(self.config['mysql'], template_cache=crop + '_cache_results', connection=self.connection)
             self.assertTrue(info['chat_memory_compatible'])
             self.assertEqual(info['cache_contract'], CONTRACT)
+
+    def test_shipped_memory_ddl_creates_nullable_graph_config(self):
+        repository = Path(__file__).resolve().parents[3]
+        ddl = (repository / 'schema/ddl/00_chat_memory.sql').read_text(encoding='utf-8')
+        # Execute the shipped DDL under a unique table name in the isolated database.
+        table = self.prefix + '_release_memory'
+        ddl = re.sub(r'\bchat_memory\b', table, ddl)
+        with self.connection.cursor() as cursor:
+            for statement in ddl.split(';'):
+                if statement.strip():
+                    cursor.execute(statement)
+            cursor.execute('SELECT COLUMN_NAME,COLUMN_TYPE,IS_NULLABLE FROM information_schema.COLUMNS '
+                           'WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=%s', (table,))
+            columns = {row['COLUMN_NAME']: row for row in cursor.fetchall()}
+        self.assertIn('graphConfig', columns)
+        self.assertEqual(columns['graphConfig']['COLUMN_TYPE'].lower(), 'json')
+        self.assertEqual(columns['graphConfig']['IS_NULLABLE'], 'YES')
 
     def test_corruption_is_rejected_before_database_write(self):
         crop = self.prefix + 'd'
