@@ -21,6 +21,8 @@
     ·
     <a href="cgr_bench/">CGR-Bench</a>
     ·
+    <a href="docs/crop_standards/">Crop Standards (English)</a>
+    ·
     <a href="tools/data_importer/">Data-import Tool</a>
   </p>
 </div>
@@ -140,6 +142,10 @@ This repository provides n8n workflow exports, **commercial rice (`bus_rice`)** 
 
 The CGR-Bench directory provides query examples and reference annotations, but **does not include germplasm repository data for the five crop types**. Therefore, the commercial rice deployment example in the repository cannot be used directly to complete all 150 benchmark queries; see the directory description for specific usage conditions.
 
+## English Crop Descriptor Standards
+
+Author-prepared English translations of the crop-specific descriptor standards for barley, maize, rice, soybean, and wheat are available in the [crop standards guide](docs/crop_standards/). These documents provide reference information on trait terminology, measurement units, and evaluation scales relevant to knowledge-enhanced retrieval. The guide explains their source and translation status and links to all five PDFs.
+
 ## What You Can Run from This Repository
 
 The released implementation is centered on **n8n workflows and data-source configuration**, not a standalone web application. Retrieval is performed by the workflows calling model services and MySQL. You can invoke the main workflow through its n8n Webhook without recreating the hosted UI, or connect a client of your own.
@@ -175,7 +181,7 @@ For custom datasets, use the [data-import tool](tools/data_importer/) and then c
 | `data/` | `bus_rice_data.sql` commercial variety data |
 | `cgr_bench/` | CGR-Bench Gold Standard Dataset (150 questions, five crops; note that the scope differs from open-source data) |
 | `backend/` | Auxiliary task-status API and optional GS prediction service; not the retrieval engine |
-| `docs/` | Workflow architecture, configuration, and setup instructions |
+| `docs/` | Workflow architecture, configuration, setup instructions, and [English crop descriptor standards](docs/crop_standards/) |
 | [`tools/data_importer/`](tools/data_importer/) | Reusable data import tools: CSV/TSV/XLSX profiling, source-specific prompts, and non-overlapping MySQL imports; includes English documentation and synthetic examples |
 
 ## Data Import Tool
