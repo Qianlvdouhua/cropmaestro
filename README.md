@@ -146,6 +146,8 @@ The CGR-Bench directory provides query examples and reference annotations, but *
 
 The [RSS evaluation package](cgr_bench/rss_evaluation/) provides frozen query-level relevance judgments, scored accession outputs, normalization values, exclusions, and a standalone Python script that reproduces the reported RSS values without database or model access. It also provides complementary precision, recall, and F1 comparisons against the released pooled reference lists. The guide explains the scoring rules, model-derived reference entries, and the limits of pooled-reference comparisons.
 
+The [Chinese-language prompt templates](docs/prompt_templates/) accompany the English reading versions in the Supplementary Note and distinguish CGR-Bench materials from current deployment templates.
+
 ## English Crop Descriptor Standards
 
 Author-prepared English translations of the crop-specific descriptor standards for barley, maize, rice, soybean, and wheat are available in the [crop standards guide](docs/crop_standards/). These documents provide reference information on trait terminology, measurement units, and evaluation scales relevant to knowledge-enhanced retrieval. The guide explains their source and translation status and links to all five PDFs.
