@@ -16,4 +16,8 @@ The original Chinese crop descriptor standards are provided through the [Nationa
 
 The English PDFs are reference translations supplied by the CropMaestro authors to make the crop-specific standards accessible to international readers. They are not official English editions issued by the source platform. Consult the original Chinese documents for authoritative wording.
 
+## Reading Chinese source pages in English
+
+Readers with access to the original Chinese pages can use Chrome's page translation to display them in English. Select Translate in the address bar and choose English. The [Chrome Help guide](https://support.google.com/chrome/answer/173424?hl=en) explains the translation settings.
+
 For the benchmark queries and reference annotations, see [CGR-Bench](../../cgr_bench/). For instructions on preparing a data source for the released workflows, see the [workflow setup guide](../setup.md).
