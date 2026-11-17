@@ -12,6 +12,8 @@
     <a href="https://github.com/Qianlvdouhua/cropmaestro/forks">
       <img src="https://img.shields.io/github/forks/Qianlvdouhua/cropmaestro" alt="GitHub forks">
     </a>
+    &nbsp; · &nbsp;
+    <a href="README.zh-CN.md">简体中文</a> | <strong>English</strong>
   </p>
 
   <p>
@@ -26,6 +28,7 @@
     <a href="tools/data_importer/">Data-import Tool</a>
   </p>
 </div>
+
 CropMaestro is a multi-agent intelligent retrieval framework designed for crop germplasm resources. It helps agricultural researchers and breeders identify candidate materials that meet their requirements from germplasm data by describing their needs using natural language.
 
 Traditional form-based retrieval typically requires users to be familiar with trait names, evaluation scales, and screening thresholds. CropMaestro organizes requirement understanding, trait-field mapping, database queries, and result interpretation into a collaborative workflow, supporting multi-trait, multi-constraint searches of germplasm data as well as Q&A regarding relevant domain expertise.
